@@ -34,19 +34,23 @@ agent-gate is not a gateway. It plugs into one.
 
 ## Prior art
 
-Two open-source projects already cover part of this ground. Both were reviewed from their READMEs on 2026-11-16, not from their code. A closer read is a Phase 0 task.
+Two open-source projects cover much of this ground. Both were read from source on 2026-11-16: Preloop v1.0.2 and the Microsoft Agent Governance Toolkit v5.0.0.
 
-- [Preloop](https://github.com/preloop/preloop) (Apache-2.0, Python) is an agent control plane with an MCP firewall that can hold a tool call for approval, and an audit hash chain.
-- [Microsoft Agent Governance Toolkit](https://github.com/microsoft/agent-governance-toolkit) (MIT) is a library that runs inside the agent. Its policies include a `require_approval` action.
+- [Preloop](https://github.com/preloop/preloop) (Apache-2.0) is an agent control plane and its own MCP proxy. It holds tool calls for approval under CEL rules, notifies approvers through several channels, and keeps a signed audit hash chain with an offline verifier.
+- [Microsoft Agent Governance Toolkit](https://github.com/microsoft/agent-governance-toolkit) (MIT) is mainly a library inside the agent process. It has a `require_approval` policy action and a protocol that binds an approval to a digest of the action.
 
-agent-gate differs in four ways:
+agent-gate differs in four ways. Each difference is narrow.
 
-1. It enforces at the gateway, not inside the agent. An agent cannot skip a check that it does not run.
-2. Policy can use Entra Agent ID claims, so a rule can tell an autonomous agent from one that acts for a user.
-3. The approver cannot be the requester.
-4. The audit chain is anchored outside the cluster, so a cluster administrator cannot rewrite it without detection.
+| | agent-gate (planned) | Preloop | Microsoft toolkit |
+|---|---|---|---|
+| Where it enforces | Inside agentgateway, as an extension | In its own MCP proxy | Inside the agent process, plus one Azure API Management sample |
+| Entra Agent ID claims in policy | Yes | No | Verifies Entra tokens, but policy does not use the agent-type claims |
+| Approver cannot be the requester | For every gated call | For one built-in tool | No such rule |
+| Audit anchored outside the system | Automatic, to immutable storage | Signed checkpoints, but the key is stored with the data and export is manual | Not implemented |
 
-If the closer read shows that these differences do not hold, [ADR 0001](adr/0001-scope-approval-gate.md) changes.
+A team that does not run agentgateway or Entra should look at Preloop first.
+
+[ADR 0001](adr/0001-scope-approval-gate.md) records this comparison and when to review it.
 
 ## Audience
 

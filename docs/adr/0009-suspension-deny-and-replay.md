@@ -29,5 +29,5 @@ Option 1 now. Option 2 later, when clients support tasks.
 
 - The agent must store the exact call and replay it. If it asks the model again and the arguments change, the digest does not match and a new approval is needed.
 - An agent that does not know the contract sees a tool error. The reference agent shows the correct handling.
-- Canonical argument encoding must be specified and tested, or equal calls produce different digests.
+- Canonical argument encoding must be specified and tested, or equal calls produce different digests. RFC 8785 (JCS) is the candidate. The Microsoft Agent Governance Toolkit binds approvals the same way. Compare its protocol before defining a new one.
 - The gate does not execute the call. The agent does, with its own identity, so the upstream audit trail stays truthful.
