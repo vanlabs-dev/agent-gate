@@ -4,7 +4,8 @@ Time box: 20 wall-clock hours of apply sessions, from the start of group 1 (desi
 
 Sessions:
 
-- 1: start 2026-11-16 19:07 NZDT, end 19:27 NZDT. Tasks 2.2, 6.1 and 7.3 are open: they need the public repo, and its creation needs the maintainer
+- 1: start 2026-11-16 19:07 NZDT, end 19:27 NZDT
+- 2: start 2026-11-16 about 19:38 NZDT. The CI job passed on pull request 1. Task 7.3 is open: the merge needs the maintainer
 
 ## 1. Checkpoint and toolchain
 
@@ -15,7 +16,7 @@ Sessions:
 ## 2. Public repo
 
 - [x] 2.1 Add `LICENSE` with the unmodified Apache-2.0 text and a short `README.md` (what it is, status, link to `docs/vision.md`). Verify: `LICENSE` matches the text at apache.org byte for byte
-- [ ] 2.2 Create the public repo `vanlabs-dev/agent-gate` and push `main`. Verify: `gh repo view vanlabs-dev/agent-gate --json visibility` prints `PUBLIC` and GitHub detects the licence as Apache-2.0
+- [x] 2.2 Create the public repo `vanlabs-dev/agent-gate` and push `main`. Verify: `gh repo view vanlabs-dev/agent-gate --json visibility` prints `PUBLIC` and GitHub detects the licence as Apache-2.0
 - [x] 2.3 Create the branch `extmcp-spike` for all later groups. Verify: `git branch --show-current`
 
 ## 3. Cluster and gateway
@@ -44,7 +45,7 @@ Sessions:
 
 ## 6. CI
 
-- [ ] 6.1 Add `.github/workflows/extmcp.yml` with `permissions: contents: read` (design decision 10) and open a pull request from `extmcp-spike`. Verify: the job passes on the pull request
+- [x] 6.1 Add `.github/workflows/extmcp.yml` with `permissions: contents: read` (design decision 10) and open a pull request from `extmcp-spike`. Verify: the job passes on the pull request
 
 ## 7. Record the result
 
