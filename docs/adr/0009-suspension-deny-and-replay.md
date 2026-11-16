@@ -1,6 +1,6 @@
 # 0009: Suspension contract is deny and replay
 
-- Status: Proposed, to be confirmed by a spike in Phase 0
+- Status: Accepted, confirmed by the Phase 0 spike on 2026-11-16 against agentgateway v1.7.0
 - Date: 2026-11-16
 
 ## Context
@@ -31,3 +31,11 @@ Option 1 now. Option 2 later, when clients support tasks.
 - An agent that does not know the contract sees a tool error. The reference agent shows the correct handling.
 - Canonical argument encoding must be specified and tested, or equal calls produce different digests. RFC 8785 (JCS) is the candidate. The Microsoft Agent Governance Toolkit binds approvals the same way. Compare its protocol before defining a new one.
 - The gate does not execute the call. The agent does, with its own identity, so the upstream audit trail stays truthful.
+
+## Confirmation
+
+The compatibility test in `test/extmcp/` passed on `kind` on 2026-11-16 against agentgateway v1.7.0. A denied call passed once after approval, in a new session with a new token for the same `sub`. A replay with changed arguments, a replay by another caller and a second replay were each denied. Findings:
+
+- The approval reference travels as text only. For `tools/call`, the client receives a tool result with `isError` true and the gate's `reason` as one text block. agentgateway drops the structured `mcp_error` payload on this path ([source](https://github.com/agentgateway/agentgateway/blob/v1.7.0/crates/agentgateway/src/mcp/guardrails/mod.rs), read on 2026-11-16).
+- The digest must read only `name` and `arguments` from the params. agentgateway merges `_meta` into the params, and `_meta` can change with each call.
+- The spike digest is not canonical. The canonical encoding is still to be defined.

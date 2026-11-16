@@ -1,6 +1,6 @@
 # Architecture options
 
-Three shapes were considered. Option A is the chosen direction. A spike in Phase 0 must confirm it. Facts about other projects were checked on 2026-11-16.
+Three shapes were considered. Option A is the chosen direction. The Phase 0 spike confirmed it on 2026-11-16 against agentgateway v1.7.0 ([ADR 0002](../adr/0002-integrate-through-agentgateway-extmcp.md)). Facts about other projects were checked on 2026-11-16. Facts about agentgateway behaviour come from its [v1.7.0 source](https://github.com/agentgateway/agentgateway/tree/v1.7.0/crates/agentgateway/src/mcp), read on that date.
 
 ## Summary
 
@@ -44,6 +44,10 @@ The `ExtMcp` service has two calls, `CheckRequest` and `CheckResponse` ([proto](
 
 No result answers the client without a call to the upstream server. [Issue #3003](https://github.com/agentgateway/agentgateway/issues/3003) requests one and is open. The gate therefore cannot return a pending result. It denies, and the agent replays the call after approval.
 
+`ExtMcp` names the gRPC service only. The feature is configured as `backend.mcp.guardrails` in an `AgentgatewayPolicy`: a `remote` processor names the gate service, and each MCP method gets a phase, `Request`, `Response` or `Full`.
+
+A deny of a `tools/call` reaches the client as a tool result with `isError` true. Its one text block holds the gate's `reason`. The structured `mcp_error` payload is dropped on this path, so the approval reference travels as text. With the code `UNKNOWN` the client receives a JSON-RPC internal error, the same shape as a gate outage.
+
 ### Request flow for a call that needs approval
 
 ```mermaid
@@ -85,10 +89,14 @@ sequenceDiagram
 ### Known limits of A
 
 - The agent must replay the stored call. If it asks the model again and the arguments change, the digest does not match.
-- The gate sees claims only when a `jwtAuth` policy is attached to the route ([issue #3485](https://github.com/agentgateway/agentgateway/issues/3485)).
+- The gate sees claims only when a `jwtAuthentication` policy is attached to the route ([issue #3485](https://github.com/agentgateway/agentgateway/issues/3485)).
+- Each claim reaches the gate through a `metadata` expression such as `jwt.sub`. A failed expression is skipped with a debug log. The gate must therefore deny a call that carries no identity claim, or an approval binds to no caller.
+- The gate receives the gateway's re-encoding of the params with `_meta` merged in, not the client's bytes. The approval digest must read only the tool name and the arguments.
+- An empty `allowedRequestHeaders` forwards every request header to the gate. Set the list. The gateway removes the token after validation unless `preserveToken` is set.
 - `CheckResponse` does not run for upstream errors ([issue #4245](https://github.com/agentgateway/agentgateway/issues/4245)), so a failed execution leaves no result digest.
-- The callout has no deadline by default. Set one.
-- `ExtMcp` is a young API. Pin the agentgateway version and upgrade through a compatibility test.
+- The deadline of the callout is not settled. The gateway code sets a default of 10 s (`with_default_timeout` in `guardrails/client.rs`). A comment in the upstream [test manifest](https://github.com/agentgateway/agentgateway/blob/v1.7.0/controller/test/e2e/testdata/extmcp/extmcp.yaml) says that the call has no deadline without a timeout policy. The compatibility test sets a `requestTimeout` of 5 s on the gate service and does not test it. Set a deadline, and measure it in Phase 1.
+- A gate outage fails closed when `failureMode` is `FailClosed`, the default. The client receives a JSON-RPC internal error and the upstream server receives no call. The compatibility test proves this.
+- `ExtMcp` is a young API. The agentgateway version is pinned, and an upgrade must pass the compatibility test in `test/extmcp/`.
 
 ## Option B: gate as proxy
 

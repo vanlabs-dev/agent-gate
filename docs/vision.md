@@ -75,4 +75,4 @@ This repo is also a public portfolio. Each claim in it must link to evidence:
 
 ## Status
 
-Planning. No code exists yet. See the [roadmap](roadmap.md).
+Phase 0 of the [roadmap](roadmap.md). A compatibility test on `kind` proves the integration with agentgateway ([ADR 0002](adr/0002-integrate-through-agentgateway-extmcp.md)). No gate exists yet.
