@@ -18,6 +18,10 @@ Proposed. Nothing below exists until its phase starts.
 - Each change goes through a short-lived branch and a pull request, including changes by the maintainer.
 - Each pull request passes a self-review checklist: tests added, docs updated, no secrets, cost effect stated if any.
 
+## Licence
+
+Apache-2.0.
+
 ## Changes
 
 - Each non-trivial change passes through four steps, each in its own session: brainstorm, proposal, review, apply.

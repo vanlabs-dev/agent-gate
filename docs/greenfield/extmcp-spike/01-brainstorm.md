@@ -29,7 +29,7 @@ The same test passes in GitHub Actions on the public repo. ADR 0002 and 0009 are
 - The stub gate holds state in memory, gates one hard-coded tool, and takes approvals through a test-only endpoint.
 - The token comes from a local test issuer. No Entra.
 - No cloud resources and no cost.
-- The repo `vanlabs-dev/agent-gate` goes public when this change is applied. The first push includes a licence file and a short README.
+- The repo `vanlabs-dev/agent-gate` goes public when this change is applied. The first push includes the Apache-2.0 licence file and a short README.
 - The Go toolchain, `kind`, `kubectl` and `helm` are installed on the development machine as part of this change. `GOPATH` must be set explicitly and must not be `~/go`.
 
 ## Non-goals
@@ -45,6 +45,8 @@ The same test passes in GitHub Actions on the public repo. ADR 0002 and 0009 are
 | How to split Phase 0 | Spike first and scaffold second, or one change | Spike first. If it fails, ADR 0002 changes before a layout is built around it |
 | When the repo goes public | From the first change, or private until the spike passes | From the first change |
 | Toolchain | Installed on the machine, or containers only | Installed on the machine |
+| Licence | Apache-2.0, or MIT | Apache-2.0. It matches agentgateway and carries a patent grant |
+| Scope after the prior-art read | Continue, or pause and rethink | Continue. The spike tests the agentgateway placement, the main difference that remains ([ADR 0001](../../adr/0001-scope-approval-gate.md)) |
 
 ## Chosen direction
 
@@ -60,6 +62,5 @@ For the proposal session.
 4. What the client receives on a deny: a tool result with `isError`, or the `mcp_error` payload. The proto comment and the docs disagree.
 5. Where the Go bindings come from: generated from a vendored copy of the pinned proto, or an upstream module.
 6. Which MCP client the test uses: the MCP Go SDK or raw JSON-RPC over HTTP.
-7. Which licence the repo takes. Apache-2.0 matches agentgateway and carries a patent grant.
-8. Where the spike lives in the repo, given that it becomes the compatibility test.
-9. Whether the Ignite review due on or after 2026-11-23 happens before the apply session.
+7. Where the spike lives in the repo, given that it becomes the compatibility test.
+8. Whether the Ignite review due on or after 2026-11-23 happens before the apply session.
