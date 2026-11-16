@@ -32,3 +32,5 @@ None.
 - **Development machine:** new tools under `~/.local`, new variables in `~/.bashrc`.
 - **Outside the machine:** one public GitHub repo. GitHub Actions on a public repo has no cost.
 - **Cost:** none. No cloud resources.
+
+Approved: 2026-11-16 (vanlabs-dev)
