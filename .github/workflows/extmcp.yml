@@ -1,0 +1,49 @@
+name: extmcp
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  compatibility:
+    name: agentgateway compatibility test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      KUBECONFIG: ${{ github.workspace }}/test/extmcp/.kube/config
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: test/extmcp/go.mod
+          cache-dependency-path: test/extmcp/go.sum
+      # The runner image ships Helm 3. The test is pinned to the version in versions.env.
+      - name: Install Helm
+        run: |
+          source test/extmcp/versions.env
+          archive="helm-${HELM_VERSION}-linux-amd64.tar.gz"
+          curl -fsSLO "https://get.helm.sh/${archive}"
+          curl -fsSL "https://get.helm.sh/${archive}.sha256sum" | sha256sum --check -
+          tar -xzf "${archive}"
+          sudo install linux-amd64/helm /usr/local/bin/helm
+          helm version --short
+      - run: make test
+      - name: Collect cluster state
+        if: failure()
+        run: |
+          mkdir -p logs
+          kubectl get pods,gateway,httproute,agentgatewaypolicy,agentgatewaybackend -A -o wide > logs/resources.txt || true
+          for ns in agent-gate-test agentgateway-system; do
+            for pod in $(kubectl -n "$ns" get pods -o name); do
+              kubectl -n "$ns" logs "$pod" --all-containers > "logs/${ns}-${pod#pod/}.log" || true
+            done
+          done
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: extmcp-logs
+          path: logs/
