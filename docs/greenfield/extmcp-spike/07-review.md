@@ -1,7 +1,7 @@
 # Review: extmcp-spike
 
 - Date: 2026-11-16
-- Session: 3, outside voice. Inputs: the [brainstorm](01-brainstorm.md), the [OpenSpec change](../../../openspec/changes/extmcp-spike/) and the project docs. No chat history.
+- Session: 3, outside voice. Inputs: the [brainstorm](01-brainstorm.md), the [OpenSpec change](../../../openspec/changes/archive/2026-11-16-extmcp-spike/) and the project docs. No chat history.
 - Source check: agentgateway tag `v1.7.0` (commit `26f5aebe`), read on 2026-11-16. File paths in the findings are in that tree under `crates/agentgateway/src/mcp/`.
 
 ## Verdict

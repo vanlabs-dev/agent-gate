@@ -2,7 +2,7 @@
 
 ## Why
 
-[ADR 0002](../../../docs/adr/0002-integrate-through-agentgateway-extmcp.md) and [ADR 0009](../../../docs/adr/0009-suspension-deny-and-replay.md) rest on one unproven claim: agentgateway can call an external gate for each MCP `tools/call`, the gate can deny with an approval reference, and an identical replay passes after approval. Every later phase builds on that claim, so it must be proven or disproven first. Scope and success signals are in the [brainstorm](../../../docs/greenfield/extmcp-spike/01-brainstorm.md).
+[ADR 0002](../../../../docs/adr/0002-integrate-through-agentgateway-extmcp.md) and [ADR 0009](../../../../docs/adr/0009-suspension-deny-and-replay.md) rest on one unproven claim: agentgateway can call an external gate for each MCP `tools/call`, the gate can deny with an approval reference, and an identical replay passes after approval. Every later phase builds on that claim, so it must be proven or disproven first. Scope and success signals are in the [brainstorm](../../../../docs/greenfield/extmcp-spike/01-brainstorm.md).
 
 ## What Changes
 
@@ -35,4 +35,4 @@ None.
 
 Approved: 2026-11-16 (vanlabs-dev)
 
-Review changes approved: 2026-11-16 (vanlabs-dev). See the [review](../../../docs/greenfield/extmcp-spike/07-review.md).
+Review changes approved: 2026-11-16 (vanlabs-dev). See the [review](../../../../docs/greenfield/extmcp-spike/07-review.md).

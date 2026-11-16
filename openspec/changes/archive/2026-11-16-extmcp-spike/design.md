@@ -2,7 +2,7 @@
 
 ## Context
 
-See [proposal.md](proposal.md) for motivation and the [brainstorm](../../../docs/greenfield/extmcp-spike/01-brainstorm.md) for scope. The repo holds docs only. No Go toolchain is installed on the development machine.
+See [proposal.md](proposal.md) for motivation and the [brainstorm](../../../../docs/greenfield/extmcp-spike/01-brainstorm.md) for scope. The repo holds docs only. No Go toolchain is installed on the development machine.
 
 The agentgateway source was read on 2026-11-16 at tag `v1.7.0` (commit `26f5aebe`, released 2026-10-27). Each fact below marked **Read** comes from that source. Each fact marked **Assumed** is not proven until the test passes.
 
@@ -21,7 +21,7 @@ The agentgateway source was read on 2026-11-16 at tag `v1.7.0` (commit `26f5aebe
 
 ### Further facts from the review
 
-The [review](../../../docs/greenfield/extmcp-spike/07-review.md) read the same tag on 2026-11-16. Each fact is **Read**. Paths are under `crates/agentgateway/src/mcp/`.
+The [review](../../../../docs/greenfield/extmcp-spike/07-review.md) read the same tag on 2026-11-16. Each fact is **Read**. Paths are under `crates/agentgateway/src/mcp/`.
 
 - `mcp_request` is not the client's bytes. It is the gateway's re-encoding of the parsed params, with `_meta` merged in (`handler.rs`, `guardrails/mod.rs`). `_meta` can hold a progress token that changes with each call.
 - For `tools/call` the gate receives the upstream's own tool name, not a multiplexed name (`guardrails/mod.rs`).

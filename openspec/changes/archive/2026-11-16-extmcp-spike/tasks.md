@@ -5,7 +5,7 @@ Time box: 20 wall-clock hours of apply sessions, from the start of group 1 (desi
 Sessions:
 
 - 1: start 2026-11-16 19:07 NZDT, end 19:27 NZDT
-- 2: start 2026-11-16 about 19:38 NZDT. The CI job passed on pull request 1. Task 7.3 is open: the merge needs the maintainer
+- 2: start 2026-11-16 about 19:38 NZDT, end 19:56 NZDT. The maintainer merged pull request 1 at 19:50, and the job passed on `main`
 
 ## 1. Checkpoint and toolchain
 
@@ -51,4 +51,4 @@ Sessions:
 
 - [x] 7.1 If every scenario passes: set ADR 0002 and ADR 0009 to "Accepted, confirmed by the Phase 0 spike" with the date, the pinned version and the findings (config key `mcp.guardrails`, reference as text only, params re-encoded with `_meta`, header forwarding, fail-closed tested). If one fails: leave both decisions unchanged and draft a new ADR with status "Proposed". Verify: each ADR status matches the test result
 - [x] 7.2 Update `docs/architecture/options.md` (extension naming, deny shape, known limits, the two deadline facts and their conflict, the rule that a gate denies a call with no identity claim), `docs/conventions.md` (add `test/extmcp/` to the layout), `docs/vision.md` (status) and `docs/roadmap.md` if option A changed. Verify: no doc says that no code exists, and each third-party fact carries a source and the date checked
-- [ ] 7.3 Merge the pull request after the CI job passes. Verify: the job passes on `main`
+- [x] 7.3 Merge the pull request after the CI job passes. Verify: the job passes on `main`
