@@ -18,6 +18,13 @@ Proposed. Nothing below exists until its phase starts.
 - Each change goes through a short-lived branch and a pull request, including changes by the maintainer.
 - Each pull request passes a self-review checklist: tests added, docs updated, no secrets, cost effect stated if any.
 
+## Changes
+
+- Each non-trivial change passes through four steps, each in its own session: brainstorm, proposal, review, apply.
+- [OpenSpec](https://github.com/Fission-AI/OpenSpec) holds the proposal, specs, design and tasks of a change under `openspec/`.
+- `docs/greenfield/<change>/` holds the brainstorm, the review notes, the verify output and the ship note of that change.
+- A change is not applied before the maintainer approves its proposal.
+
 ## Commits
 
 - Format: `type(scope): Subject`, after [Conventional Commits](https://www.conventionalcommits.org/). The scope is optional.
