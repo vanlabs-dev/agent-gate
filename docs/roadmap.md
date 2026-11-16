@@ -4,7 +4,7 @@ The plan assumes about 10 hours a week from one maintainer. The order puts the l
 
 | Phase | Weeks | Ships | Exit test |
 |---|---|---|---|
-| 0 Foundations | 1 to 2 | Public repo, conventions, CI for Go and Python. Spike on `kind`: agentgateway calls a stub gate, and a deny followed by a replay works. Read of Preloop and the Microsoft Agent Governance Toolkit | The spike passes in CI. ADR 0002 and 0009 are confirmed or changed |
+| 0 Foundations | 1 to 2 | Public repo, conventions, CI for Go and Python. Build, test and lint commands in `AGENTS.md`. Spike on `kind`: agentgateway calls a stub gate, and a deny followed by a replay works. Read of Preloop and the Microsoft Agent Governance Toolkit | The spike passes in CI. ADR 0002 and 0009 are confirmed or changed |
 | 1 Core on `kind` | 3 to 6 | Policy engine, pending approvals, replay, hash-chained audit, verifier CLI, minimal inbox. One stub MCP server and a script as the agent | One call allowed, one denied, one approved then replayed. The audit chain verifies. Tag `v0.1.0` |
 | 2 Azure | 7 to 10 | Terraform, AKS, keyless login from GitHub Actions, Entra token checks, workload identity, Helm deploy, start and stop workflows, budget alerts | The pipeline builds the cluster and deploys the gate. The first real bill is compared with the cost model. Tag `v0.2.0` |
 | 3 Agent and demo | 11 to 13 | Python ops agent with one real action: stop the idle cluster or delete an orphan disk. Guest invitations, sandbox role, per-guest token cap, guided tour, README, diagram | A 30-minute walkthrough. A guest signs in and approves a sandboxed action. Tag `v0.3.0` |

@@ -80,6 +80,11 @@ One environment, `demo`. `kind` in CI takes the place of a staging cluster.
 - Each price or third-party fact carries a source and the date checked.
 - A document that no longer matches the code is a bug.
 
+## Coding agents
+
+- `AGENTS.md` at the repo root holds the instructions for AI coding agents.
+- It links to the documents in `docs/` and does not restate them. It adds only the limits that apply to an agent, and the build, test and lint commands.
+
 ## Writing
 
 - Plain technical English. Short sentences, active voice.
