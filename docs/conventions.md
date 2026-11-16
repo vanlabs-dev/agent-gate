@@ -20,18 +20,26 @@ Proposed. Nothing below exists until its phase starts.
 
 ## Commits
 
-- Imperative mood, active voice.
-- A short, capitalised subject of about 50 characters, with no full stop.
+- Format: `type(scope): Subject`, after [Conventional Commits](https://www.conventionalcommits.org/). The scope is optional.
+- Types: `feat`, `fix`, `docs`, `test`, `refactor`, `ci`, `build`, `chore`.
+- Subject: imperative mood, capitalised, about 50 characters, with no full stop.
+- Mark a breaking change with `!` after the type.
 - One idea for each commit.
 - A body only when the reason is not obvious.
 - No attribution trailers.
 
-Open item: whether to add Conventional Commits prefixes (`feat:`, `fix:`) so that release notes can be generated. Decide before `v0.1.0`.
+Examples:
+
+```text
+feat(gate): Add approval request store
+fix(agent): Replay the stored call after approval
+docs: Add cost model
+```
 
 ## Releases
 
 - SemVer tags, starting at `v0.1.0`.
-- Release notes for each tag.
+- Release notes for each tag, generated from the commit prefixes.
 
 ## CI and CD
 
