@@ -19,6 +19,19 @@ The agentgateway source was read on 2026-11-16 at tag `v1.7.0` (commit `26f5aebe
 | 7 | Location | `test/extmcp/`. See decision 7. |
 | 8 | Ignite review | Not a blocker. See decision 11. |
 
+### Further facts from the review
+
+The [review](../../../docs/greenfield/extmcp-spike/07-review.md) read the same tag on 2026-11-16. Each fact is **Read**. Paths are under `crates/agentgateway/src/mcp/`.
+
+- `mcp_request` is not the client's bytes. It is the gateway's re-encoding of the parsed params, with `_meta` merged in (`handler.rs`, `guardrails/mod.rs`). `_meta` can hold a progress token that changes with each call.
+- For `tools/call` the gate receives the upstream's own tool name, not a multiplexed name (`guardrails/mod.rs`).
+- With `allowedRequestHeaders` empty, the gate receives every request header (`guardrails/client.rs`).
+- The gateway removes the JWT after validation unless the JWT policy sets `preserveToken`.
+- A `metadata` expression that fails is skipped with a debug log. The gate then receives no such field (`guardrails/client.rs`, `build_metadata`).
+- `FailClosed` is the default. A gate outage gives the client a JSON-RPC internal error with the message `guardrail check failed`, not a tool result (`guardrails/client.rs`, `mod.rs`).
+- The deadline facts disagree. The client code sets a 10 s default (`with_default_timeout`). The comment in the upstream test manifest says that no deadline exists without a policy.
+- The upstream end-to-end manifest uses only the phases `Request` and `Response`. Upstream does not test `Full` on `tools/call` end to end.
+
 ## Goals / Non-Goals
 
 **Goals:**
@@ -31,7 +44,7 @@ The agentgateway source was read on 2026-11-16 at tag `v1.7.0` (commit `26f5aebe
 
 - Reusable gate code. The stub gate is thrown away in Phase 1. Only the test and manifests carry over.
 - The canonical argument encoding for the approval digest. That decision belongs to Phase 1.
-- Timeout, failure-mode and performance behaviour.
+- Timeout and performance behaviour. Fail-closed on a gate outage is tested (decision 9). Other failure behaviour is not.
 
 ## Decisions
 
@@ -49,10 +62,12 @@ Namespace `agent-gate-test`. Resources, after the upstream test manifest `contro
 - `AgentgatewayBackend` with one static MCP target: the stub MCP server, protocol `StreamableHTTP`.
 - `HTTPRoute` from the gateway to that backend.
 - `AgentgatewayPolicy` on the route: `traffic.jwtAuthentication`, mode `Strict`, one provider with inline JWKS.
-- `AgentgatewayPolicy` on the backend: `backend.mcp.guardrails.processors[0]` with `remote.backendRef` to the stub gate, `failureMode: FailClosed`, `metadata: {sub: jwt.sub, iss: jwt.iss}`, and `methods: {tools/call: Full}`.
+- `AgentgatewayPolicy` on the backend: `backend.mcp.guardrails.processors[0]` with `remote.backendRef` to the stub gate, `failureMode: FailClosed`, `metadata: {sub: jwt.sub, iss: jwt.iss}`, `allowedRequestHeaders: [mcp-protocol-version]`, and `methods: {tools/call: Full}`.
 - `AgentgatewayPolicy` on the stub gate `Service`: `backend.http.requestTimeout: 5s`.
 
 `Full` runs both `CheckRequest` and `CheckResponse` for `tools/call`.
+
+An empty `allowedRequestHeaders` forwards every header. The list therefore names one harmless header, so that the gate receives no other. The 5 s deadline is configured and not tested.
 
 ### 3. Deny carries the reference in `reason`
 
@@ -72,14 +87,16 @@ Alternative: vendor `ext_mcp.proto` and generate code. Rejected: it adds `protoc
 
 One Go binary with two listeners:
 
-- gRPC `ExtMcp` server. `CheckRequest` passes every method except `tools/call` for the hard-coded tool `delete_thing`. For that tool it computes a digest, passes and consumes a matching approved entry, or stores a pending entry and denies. `CheckResponse` records the result and passes.
-- Test-only HTTP: `POST /approve` with a reference, `GET /requests` and `GET /responses` to read what the gate received, `POST /reset`.
+- gRPC `ExtMcp` server. `CheckRequest` passes every method except `tools/call` for the hard-coded tool `delete_thing`. For that tool it computes a digest, passes and consumes a matching approved entry, or stores a pending entry and denies. It denies with no pending entry when `sub` is absent from `metadata_context`. `CheckResponse` records the result and passes.
+- Test-only HTTP: `POST /approve` with a reference, `GET /requests` and `GET /responses` to read what the gate received, `POST /reset`. `/requests` includes the headers of each request.
 
-The digest is SHA-256 over `sub`, the service name, the tool name and the arguments after a decode and re-encode with Go `encoding/json` (sorted keys). State is a mutex and a map. This digest is for the spike only.
+The digest is SHA-256 over `sub`, the service name, the tool name and the arguments after a decode and re-encode with Go `encoding/json` (sorted keys). It reads only `name` and `arguments` from `mcp_request`, never the whole params, because `_meta` changes between calls. State is a mutex and a map. This digest is for the spike only.
 
 ### 6. Stub MCP server and test client use the MCP Go SDK
 
 `github.com/modelcontextprotocol/go-sdk` v1.8.0. The stub server exposes two tools over streamable HTTP, `echo` (ungated) and `delete_thing` (gated), and a test-only `GET /calls` that returns the calls it received. The test uses the SDK client, so it sees a deny as a real agent does.
+
+The test client sends its token through an `http.RoundTripper` that holds a replaceable token. A scenario can then open a session with a valid token and send a later `tools/call` with a different token, an invalid token or no token.
 
 Alternative: raw JSON-RPC with `net/http`, as the upstream test does with `curl`. Kept as the fallback if the SDK client and agentgateway do not agree on a protocol version. ADR 0003 already limits the SDK to test servers.
 
@@ -100,7 +117,7 @@ A separate module keeps the SDK and stub dependencies out of the future `gate/` 
 
 ### 8. Token: key generated at run time
 
-The test's `TestMain` generates an RSA key, applies the JWT policy with the public JWKS inline, and signs tokens in process. No issuer service runs, and no private key enters the repo. The invalid-token scenario signs with a second key.
+The test's `TestMain` generates an RSA key, applies the JWT policy with the public JWKS inline, and signs tokens in process. No issuer service runs, and no private key enters the repo. The invalid-token scenario signs with a second key. The different-caller scenario signs a token with another `sub`. The replay scenario signs a new token for the same `sub`.
 
 Alternative: a committed test key pair. Rejected: conventions forbid secrets in the repo, and secret scanners flag it.
 
@@ -113,7 +130,10 @@ The root `Makefile` target `test`:
 3. Installs the Gateway API CRDs and both charts, then waits for the controller.
 4. Builds the stub image and loads it with `kind load docker-image`.
 5. Applies the manifests and waits for the gateway and both stubs.
-6. Runs `go test -tags e2e -count=1 ./...` in `test/extmcp/`.
+6. Runs `go test -tags e2e -count=1 -v ./...` in `test/extmcp/`.
+7. Exits non-zero when the output does not show that `TestE2E` ran and passed. A wrong build tag then fails the target.
+
+The scenario "Gate unavailable" runs last. It scales the stub gate deployment to zero with `kubectl`, waits until no gate pod exists, calls the gated tool, and then scales the deployment back to one.
 
 The test reaches the gateway and the stubs' test-only ports through `kubectl port-forward`. No load balancer is installed. `make clean` deletes the cluster.
 
@@ -121,9 +141,9 @@ The name `test` is deliberate: the greenfield verify script runs `make test` whe
 
 ### 10. CI
 
-One workflow, `.github/workflows/extmcp.yml`, on pull requests and pushes to `main`: checkout, `actions/setup-go` from `test/extmcp/go.mod`, install Helm at the version in `versions.env`, `make test`, and on failure upload pod logs.
+One workflow, `.github/workflows/extmcp.yml`, on pull requests and pushes to `main`: checkout, `actions/setup-go` from `test/extmcp/go.mod`, install Helm at the version in `versions.env`, `make test`, and on failure upload pod logs. The workflow sets `permissions: contents: read`.
 
-The `ubuntu-24.04` runner ships Docker, `kind` 0.33.0, `kubectl` 1.37.2 and Helm 3.22.1 ([runner image readme](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md), checked 2026-11-16). `kind` and `kubectl` match decision 12. Helm does not, so the workflow installs Helm 4.
+The `ubuntu-24.04` runner ships Docker, `kind` 0.33.0, `kubectl` 1.37.2 and Helm 3.22.1 ([runner image readme](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md), checked 2026-11-16). `kind` and `kubectl` match decision 12. Helm does not, so the workflow installs Helm 4. The runner image changes weekly, so `kind` and `kubectl` in CI can drift from decision 12. This is accepted: the node image is pinned.
 
 ### 11. Ignite checkpoint does not block the spike
 
@@ -142,12 +162,13 @@ The roadmap sets a review of ADR 0001 and 0002 on or after 2026-11-23. The spike
 
 ### 13. Time box and exit
 
-20 hours of work from the start of apply. Record hours in `tasks.md` notes. If the test does not pass by then, stop, write what failed in `09-ship.md`, and draft a new ADR with status "Proposed" that chooses between options B and C. Do not edit the decision in ADR 0002.
+20 wall-clock hours of apply sessions, from the start of task group 1. Record the start and end time of each apply session in `tasks.md`. If the test does not pass by then, stop, write what failed in `09-ship.md`, and draft a new ADR with status "Proposed" that chooses between options B and C. Do not edit the decision in ADR 0002.
 
 ## Risks / Trade-offs
 
 - [The charts need CRDs or a load balancer that `kind` lacks] → The upstream setup adds Istio CRDs, inference CRDs and MetalLB. Add only what the controller logs demand. Port-forward removes the need for MetalLB.
-- [`jwt.sub` does not resolve in `metadata`] → Upstream issue #3485 reports that it resolves only with a JWT policy on the route. Decision 2 attaches one. If it still fails, forward the `authorization` header and record the gap in ADR 0002.
+- [`jwt.sub` does not resolve in `metadata`] → Upstream issue #3485 reports that it resolves only with a JWT policy on the route. Decision 2 attaches one. If it still fails, set `preserveToken: true` on the JWT policy, add `authorization` to `allowedRequestHeaders`, and record the gap in ADR 0002. The requirement that the gate receives no token then fails.
+- [The scale to zero is slow, or the gateway keeps a connection to the old pod] → Wait for the pod to be deleted before the call. Give the scenario its own timeout.
 - [`CheckResponse` does not run for `tools/call`] → Phase `Full` is in the CRD enum and in the gateway code. If it fails, the spec requirement fails and ADR 0002 records a limit.
 - [The SDK client rejects the gateway's protocol version] → Fall back to raw JSON-RPC (decision 6).
 - [The pseudo-version of the bindings does not resolve] → Vendor the proto and generate code (decision 4, alternative).

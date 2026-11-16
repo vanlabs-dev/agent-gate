@@ -18,7 +18,7 @@
 
 ### New Capabilities
 
-- `agentgateway-integration`: the contract between agentgateway and a gate behind its `ExtMcp` extension. It covers what the gate receives, how a deny reaches the client, the deny and replay sequence, and the pinned version the contract is tested against.
+- `agentgateway-integration`: the contract between agentgateway and a gate behind its `ExtMcp` extension. It covers what the gate receives, how a deny reaches the client, the deny and replay sequence, the behaviour when the gate is unavailable, and the pinned version the contract is tested against.
 
 ### Modified Capabilities
 
@@ -34,3 +34,5 @@ None.
 - **Cost:** none. No cloud resources.
 
 Approved: 2026-11-16 (vanlabs-dev)
+
+Review changes approved: 2026-11-16 (vanlabs-dev). See the [review](../../../docs/greenfield/extmcp-spike/07-review.md).

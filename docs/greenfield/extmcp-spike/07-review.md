@@ -49,4 +49,10 @@ Not checked: the charts on `kind`, the charts with Helm 4, `jwt.sub` in the `met
 
 ## Resolution
 
-Pending the maintainer's decision.
+Decided by the maintainer on 2026-11-16.
+
+- F1 to F12: the proposed change is folded into the OpenSpec change through `/opsx:update`. For F2, fail-closed is tested and failure mode is no longer a non-goal.
+- F10: an in-process stub test covers the rule. The spec has no scenario for it.
+- F13 and F14: accepted with no change.
+
+The change now has 25 tasks and passes `openspec validate extmcp-spike --strict`.

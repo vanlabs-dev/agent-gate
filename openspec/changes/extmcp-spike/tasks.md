@@ -1,6 +1,8 @@
 # Tasks
 
-Time box: 20 hours from the start of group 1 (design decision 13). Record hours used at the end of each group.
+Time box: 20 wall-clock hours of apply sessions, from the start of group 1 (design decision 13). Record the start and end time of each apply session on the line below.
+
+Sessions: none yet.
 
 ## 1. Checkpoint and toolchain
 
@@ -24,25 +26,26 @@ Time box: 20 hours from the start of group 1 (design decision 13). Record hours 
 
 - [ ] 4.1 Create the Go module in `test/extmcp/` with the bindings pinned to commit `26f5aebe`, gRPC and the MCP Go SDK v1.8.0. Verify: `go list -m github.com/agentgateway/agentgateway/api` prints a pseudo-version that ends in `26f5aebe99a3`
 - [ ] 4.2 Write `cmd/stub-mcp` with tools `echo` and `delete_thing` and the test-only `GET /calls`. Verify: a Go test calls `echo` through the SDK client in process and `/calls` lists that call
-- [ ] 4.3 Write `cmd/stub-gate` (design decision 5). Verify: a Go test drives the gRPC server in process through deny, approve, identical replay, second replay and changed arguments, and checks `/requests` and `/responses`
+- [ ] 4.3 Write `cmd/stub-gate` (design decision 5). Verify: a Go test drives the gRPC server in process through deny, approve, identical replay, second replay and changed arguments, and checks `/requests` and `/responses`. The same test shows that a replay with a different `_meta` passes, and that a call with no `sub` is denied with no pending entry
 - [ ] 4.4 Add the `Dockerfile` and the `Makefile` steps that build the image and load it into `kind`. Verify: `docker build` passes and the image is listed on the node
 
 ## 5. End-to-end test
 
-- [ ] 5.1 Add manifests for both stubs, the `AgentgatewayBackend`, the `HTTPRoute` and the guardrails and timeout policies (design decision 2). Verify: both stub deployments are `Available` and each policy reports `Accepted`
-- [ ] 5.2 Write `TestMain` in `e2e_test.go`: generate the keys, apply the JWT policy, open the port-forwards, reset the stubs. Add the scenario "Ungated tool". Verify: the scenario passes against the cluster
-- [ ] 5.3 Add the scenarios "First call to a gated tool", "Replay after approval", "Second replay of a used approval" and "Replay with changed arguments". Verify: all four pass, and each asserts the upstream call count from `/calls`
-- [ ] 5.4 Add the scenarios "Call with a valid token" and "Call with a token that fails validation". Verify: both pass, and the first asserts `sub` in `metadata_context` from `/requests`
+- [ ] 5.1 Add manifests for both stubs, the `AgentgatewayBackend`, the `HTTPRoute` and the guardrails and timeout policies, with `allowedRequestHeaders` set (design decision 2). Verify: both stub deployments are `Available` and each policy reports `Accepted`
+- [ ] 5.2 Write `TestMain` in `e2e_test.go`: generate the keys, apply the JWT policy, open the port-forwards, reset the stubs. Give the test client the token `http.RoundTripper` (design decision 6). Add the scenario "Ungated tool". Verify: the scenario passes against the cluster
+- [ ] 5.3 Add the scenarios "First call to a gated tool", "Replay after approval", "Second replay of a used approval", "Replay with changed arguments" and "Replay by a different caller". "Replay after approval" uses a new session and a newly signed token. Verify: all five pass, each asserts the upstream call count from `/calls`, and "Replay after approval" asserts that the upstream arguments equal the approved arguments
+- [ ] 5.4 Add the scenarios "Call with a valid token", "Call with a token that fails validation" and "Call with no token". The last two send `tools/call` in a session that a valid token opened. Verify: all three pass, and the first asserts from `/requests` that `sub` is in `metadata_context` and that no `authorization` header is present
 - [ ] 5.5 Add the scenario "Result of a passed call". Verify: it passes and asserts the upstream result in `/responses`
-- [ ] 5.6 Join every step under the `Makefile` target `test` and add `clean`. Verify: `make test` exits 0 two times in a row from a state with no cluster, and `make clean` removes the cluster
-- [ ] 5.7 Add a "Run the compatibility test" section to `README.md` with the required tools and the command. Verify: the command runs as written
+- [ ] 5.6 Add the scenario "Gate unavailable" as the last scenario (design decision 9). Verify: it passes, the client error is a JSON-RPC error and not a tool result, `/calls` shows no upstream call, and the stub gate deployment is `Available` again afterwards
+- [ ] 5.7 Join every step under the `Makefile` target `test` and add `clean`. Verify: `make test` exits 0 two times in a row from a state with no cluster and prints each scenario as passed, `go test` with a wrong build tag makes the target exit non-zero, and `make clean` removes the cluster
+- [ ] 5.8 Add a "Run the compatibility test" section to `README.md` with the required tools and the command. Verify: the command runs as written
 
 ## 6. CI
 
-- [ ] 6.1 Add `.github/workflows/extmcp.yml` (design decision 10) and open a pull request from `extmcp-spike`. Verify: the job passes on the pull request
+- [ ] 6.1 Add `.github/workflows/extmcp.yml` with `permissions: contents: read` (design decision 10) and open a pull request from `extmcp-spike`. Verify: the job passes on the pull request
 
 ## 7. Record the result
 
-- [ ] 7.1 If every scenario passes: set ADR 0002 and ADR 0009 to "Accepted, confirmed by the Phase 0 spike" with the date, the pinned version and the findings (config key `mcp.guardrails`, reference as text only). If one fails: leave both decisions unchanged and draft a new ADR with status "Proposed". Verify: each ADR status matches the test result
-- [ ] 7.2 Update `docs/architecture/options.md` (extension naming, deny shape, known limits), `docs/conventions.md` (add `test/extmcp/` to the layout), `docs/vision.md` (status) and `docs/roadmap.md` if option A changed. Verify: no doc says that no code exists, and each third-party fact carries a source and the date checked
+- [ ] 7.1 If every scenario passes: set ADR 0002 and ADR 0009 to "Accepted, confirmed by the Phase 0 spike" with the date, the pinned version and the findings (config key `mcp.guardrails`, reference as text only, params re-encoded with `_meta`, header forwarding, fail-closed tested). If one fails: leave both decisions unchanged and draft a new ADR with status "Proposed". Verify: each ADR status matches the test result
+- [ ] 7.2 Update `docs/architecture/options.md` (extension naming, deny shape, known limits, the two deadline facts and their conflict, the rule that a gate denies a call with no identity claim), `docs/conventions.md` (add `test/extmcp/` to the layout), `docs/vision.md` (status) and `docs/roadmap.md` if option A changed. Verify: no doc says that no code exists, and each third-party fact carries a source and the date checked
 - [ ] 7.3 Merge the pull request after the CI job passes. Verify: the job passes on `main`
