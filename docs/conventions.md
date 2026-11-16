@@ -2,10 +2,11 @@
 
 ## Repo layout
 
-Proposed. Nothing below exists until its phase starts.
+`test/extmcp/` exists. Each other path is proposed and is created when its phase starts.
 
 | Path | Content |
 |---|---|
+| `test/extmcp/` | The agentgateway compatibility test: a stub gate, a stub MCP server, `kind` manifests and the pinned versions. Its own Go module |
 | `gate/` | The gate, in Go |
 | `agents/azure-ops/` | The reference agent, in Python |
 | `infra/` | Terraform |
@@ -71,8 +72,8 @@ One environment, `demo`. `kind` in CI takes the place of a staging cluster.
 
 ## Dependencies
 
-- Pin agentgateway and the `ExtMcp` bindings to an exact version.
-- Upgrade through a compatibility test, not by a floating tag.
+- Pin agentgateway and the `ExtMcp` bindings to an exact version. The versions are in `test/extmcp/versions.env` and `test/extmcp/go.mod`.
+- Upgrade through the compatibility test, `make test`, not by a floating tag.
 
 ## Secrets
 
