@@ -1,0 +1,72 @@
+# After the upstream test manifest controller/test/e2e/testdata/extmcp/extmcp.yaml.
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: stub-mcp
+  namespace: agent-gate-test
+spec:
+  mcp:
+    targets:
+      - name: stub-mcp
+        static:
+          host: stub-mcp.agent-gate-test.svc.cluster.local
+          port: 8080
+          protocol: StreamableHTTP
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: mcp
+  namespace: agent-gate-test
+spec:
+  parentRefs:
+    - name: gateway
+  rules:
+    - backendRefs:
+        - name: stub-mcp
+          group: agentgateway.dev
+          kind: AgentgatewayBackend
+---
+# Each tools/call goes to the stub gate before and after the upstream call.
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayPolicy
+metadata:
+  name: gate
+  namespace: agent-gate-test
+spec:
+  targetRefs:
+    - group: agentgateway.dev
+      kind: AgentgatewayBackend
+      name: stub-mcp
+  backend:
+    mcp:
+      guardrails:
+        processors:
+          - remote:
+              backendRef:
+                name: stub-gate
+                port: 9001
+              failureMode: FailClosed
+              metadata:
+                sub: jwt.sub
+                iss: jwt.iss
+              # An empty list forwards every header. Name one harmless header.
+              allowedRequestHeaders:
+                - mcp-protocol-version
+            methods:
+              tools/call: Full
+---
+# Deadline for the call to the stub gate. Configured, not tested.
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayPolicy
+metadata:
+  name: gate-timeout
+  namespace: agent-gate-test
+spec:
+  targetRefs:
+    - group: ""
+      kind: Service
+      name: stub-gate
+  backend:
+    http:
+      requestTimeout: 5s
