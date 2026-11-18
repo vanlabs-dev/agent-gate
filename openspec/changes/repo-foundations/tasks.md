@@ -41,9 +41,9 @@ Tasks marked **Maintainer** change a GitHub setting. The agent writes the comman
 
 ## 7. Protection of main
 
-- [ ] 7.1 **Maintainer:** apply the ruleset with the `POST` command in design decision 9. Verify: `gh api repos/vanlabs-dev/agent-gate/rulesets` lists one active ruleset, and its rules and check names equal the file
-- [ ] 7.2 **Maintainer:** push one empty commit to `main` directly, with a subject that can stay in the history. Verify: GitHub rejects the push. Record the output in `08-verify.md`. If the push passes, stop: leave the commit, do not force push, and correct the ruleset
-- [ ] 7.3 Read the merge state of the demo pull request. Verify: `gh pr view <number> --json mergeStateStatus` prints `BLOCKED`. Then close the pull request and delete the branch `demo/failed-checks`
+- [x] 7.1 **Maintainer:** apply the ruleset with the `POST` command in design decision 9. Verify: `gh api repos/vanlabs-dev/agent-gate/rulesets` lists one active ruleset, and its rules and check names equal the file
+- [x] 7.2 **Maintainer:** push one empty commit to `main` directly, with a subject that can stay in the history. Verify: GitHub rejects the push. Record the output in `08-verify.md`. If the push passes, stop: leave the commit, do not force push, and correct the ruleset
+- [x] 7.3 Read the merge state of the demo pull request. Verify: `gh pr view <number> --json mergeStateStatus` prints `BLOCKED`. Then close the pull request and delete the branch `demo/failed-checks`
 - [ ] 7.4 **Maintainer:** enable Dependabot security updates. Secret scanning and push protection are on already. Verify: `gh api repos/vanlabs-dev/agent-gate --jq .security_and_analysis` shows `secret_scanning`, `secret_scanning_push_protection` and `dependabot_security_updates` as `enabled`
 
 ## 8. Close Phase 0

@@ -26,4 +26,17 @@ python: FAILED tests/test_demo_failure.py::test_planted_failure - AssertionError
 secrets: WRN leaks found: 1
 ```
 
-The `secrets` log gives a count only. With `--verbose`, the same scan prints `RuleID: generic-api-key` and `File: demo/config.py`, with the value redacted.
+The `secrets` log gives a count only. With `--verbose`, the same scan prints `RuleID: generic-api-key` and `File: demo/config.py`, with the value redacted. `make secrets` now runs with `--verbose` (decided by the maintainer, 2026-11-18).
+
+| Task | Result |
+|---|---|
+| 7.1 | Ruleset `27522673` active. Its rules, check names, approvals, strict mode and bypass list equal `.github/rulesets/main.json`. GitHub adds `require_extra_approval_for_unattributed_changes: true` by default |
+| 7.2 | Direct push of an empty commit to `main` rejected (output below). The local commit was reset |
+| 7.3 | PR #5 `mergeStateStatus`: `BLOCKED`. Closed, not merged. Branch `demo/failed-checks` deleted |
+
+```text
+remote: error: GH013: Repository rule violations found for refs/heads/main.
+remote: - Changes must be made through a pull request.
+remote: - 6 of 6 required status checks are expected.
+ ! [remote rejected] main -> main (push declined due to repository rule violations)
+```
