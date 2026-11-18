@@ -46,15 +46,19 @@ Each pull request, and each update of `main`, SHALL run these checks: Go lint an
 
 #### Scenario: Lint error
 - **WHEN** a pull request adds a lint finding
-- **THEN** the lint check of that language fails
+- **THEN** the check of that language fails
 
 #### Scenario: Failed test
 - **WHEN** a pull request adds a unit test that fails
-- **THEN** the test check of that language fails
+- **THEN** the check of that language fails
 
 #### Scenario: Planted secret
 - **WHEN** a pull request adds a commit that contains a fake credential
 - **THEN** the secret scan fails
+
+#### Scenario: Secret on another branch
+- **WHEN** a branch that is not part of a pull request contains a fake credential
+- **THEN** the secret scan of that pull request passes
 
 ### Requirement: Workflow dependencies are pinned
 Each `uses:` line in a workflow SHALL name a full commit SHA. Each tool that a check runs SHALL have its version pinned in the repo.

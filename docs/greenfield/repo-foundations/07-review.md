@@ -51,4 +51,13 @@ Not checked: the ruleset JSON against the API (the file does not exist yet), the
 
 ## Resolution
 
-Open. The maintainer decides.
+Decided by the maintainer on 2026-11-18.
+
+- F1 to F14 and F16: the proposed change is folded into the OpenSpec change through `/opsx:update`.
+- F1: the spec also gets the scenario "Secret on another branch", and task 3.1 tests it.
+- F5: `actionlint` runs with `-shellcheck= -pyflakes=`. No `shellcheck` is installed.
+- F15: accepted. The risk list of the design has one new line.
+
+The task numbers in the findings are the numbers before the update. After it, the merge is task 5.1, the demo is task 6.1, the protection tasks are 7.1 to 7.4, and the close tasks are 8.1 and 8.2.
+
+The change still has 25 tasks and passes `openspec validate repo-foundations --strict`.
