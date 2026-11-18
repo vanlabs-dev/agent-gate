@@ -64,7 +64,7 @@ vuln:
 
 # HEAD only: by default gitleaks scans all refs, and one other branch would fail each scan.
 secrets:
-	$(GITLEAKS) git --redact --log-opts="--full-history HEAD"
+	$(GITLEAKS) git --redact --verbose --log-opts="--full-history HEAD"
 
 e2e: tools cluster gateway image deploy e2e-run
 
