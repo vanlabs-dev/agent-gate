@@ -92,12 +92,24 @@ The compatibility test runs 11 scenarios against real agentgateway v1.7.0 on `ki
 
 The full contract is in the [spec](openspec/specs/agentgateway-integration/spec.md).
 
+## Run the checks
+
+Required tools: Go, `uv` and `make`. The check tools run through `go run`, pinned in [`versions.env`](versions.env).
+
+```sh
+make check    # lint and unit tests, no cluster
+make vuln     # govulncheck
+make secrets  # gitleaks on the history of HEAD
+```
+
+[`AGENTS.md`](AGENTS.md) lists each command and what it needs.
+
 ## Run the compatibility test
 
 Required tools: Go, Docker, `kind`, `kubectl`, Helm 4 and `make`. Versions are pinned in [`test/extmcp/versions.env`](test/extmcp/versions.env).
 
 ```sh
-make test
+make e2e
 ```
 
 The command creates the `kind` cluster `agent-gate-extmcp`, deploys the pinned agentgateway with both stubs, and runs each scenario. It exits 0 only when every scenario passes. It takes about one minute, and keeps its kubeconfig in `test/extmcp/.kube/`.
@@ -149,6 +161,7 @@ The [roadmap](docs/roadmap.md) holds every phase and its exit test.
 | Path | Content |
 |---|---|
 | [`test/extmcp/`](test/extmcp/) | The compatibility test: stub gate, stub MCP server, `kind` manifests, pinned versions |
+| [`agents/azure-ops/`](agents/azure-ops/) | The Python project of the ops agent. Scaffold only until Phase 3 |
 | [`docs/`](docs/) | Vision, architecture, decision records, roadmap, cost model, conventions |
 | [`openspec/`](openspec/) | The proposal, design, specs and tasks of each change |
 

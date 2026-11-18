@@ -1,0 +1,28 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: gomod
+    directory: /test/extmcp
+    schedule:
+      interval: monthly
+    ignore:
+      # This version follows AGENTGATEWAY_COMMIT in test/extmcp/versions.env.
+      - dependency-name: github.com/agentgateway/agentgateway/api
+    groups:
+      go:
+        patterns: ["*"]
+
+  - package-ecosystem: uv
+    directory: /agents/azure-ops
+    schedule:
+      interval: monthly
+    groups:
+      python:
+        patterns: ["*"]

@@ -2,7 +2,7 @@
 
 // Package extmcp_test proves the contract between agentgateway and a gate
 // behind its ExtMcp extension. It runs against the kind cluster that
-// `make test` creates. Each subtest of TestE2E is one scenario of the spec
+// `make e2e` creates. Each subtest of TestE2E is one scenario of the spec
 // openspec/specs/agentgateway-integration.
 package extmcp_test
 

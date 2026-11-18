@@ -13,6 +13,22 @@ Instructions for AI coding agents that work in this repo.
 | What may this cost? | [docs/cost-model.md](docs/cost-model.md) |
 | How are commits, pull requests, CI, dependencies, secrets and docs handled? | [docs/conventions.md](docs/conventions.md) |
 
+## Commands
+
+Run each from the repo root. Run `make check` before each push.
+
+| Command | Runs | Needs |
+|---|---|---|
+| `make check` | `make lint` and `make test` | Go, `uv` |
+| `make lint` | Go lint (`golangci-lint`), Python lint (`ruff`), workflow lint (`actionlint`) | Go, `uv` |
+| `make test` | Go unit tests and Python tests. No cluster | Go, `uv` |
+| `make vuln` | `govulncheck` on each Go module | Go, network |
+| `make secrets` | `gitleaks` on the history of `HEAD` | Go |
+| `make e2e` | The agentgateway compatibility test on a `kind` cluster | Go, Docker, `kind`, `kubectl`, Helm 4 |
+| `make clean` | Deletes the `kind` cluster of `make e2e` | `kind` |
+
+The Go tools run with `go run <module>@<version>`. Their versions are in [`versions.env`](versions.env). Nothing needs to be installed beyond Go and `uv`.
+
 ## Limits
 
 Stop and ask the maintainer before you:

@@ -2,13 +2,14 @@
 
 ## Repo layout
 
-`test/extmcp/` exists. Each other path is proposed and is created when its phase starts.
+`test/extmcp/`, `agents/azure-ops/` and `versions.env` exist. Each other path is proposed and is created when its phase starts.
 
 | Path | Content |
 |---|---|
+| `versions.env` | The pinned versions of the check tools: `golangci-lint`, `govulncheck`, `actionlint`, `gitleaks` |
 | `test/extmcp/` | The agentgateway compatibility test: a stub gate, a stub MCP server, `kind` manifests and the pinned versions. Its own Go module |
 | `gate/` | The gate, in Go |
-| `agents/azure-ops/` | The reference agent, in Python |
+| `agents/azure-ops/` | The reference agent, in Python. A `uv` project with `ruff`, `pytest` and one smoke test. No agent logic before Phase 3 |
 | `infra/` | Terraform |
 | `deploy/` | Helm charts |
 | `docs/` | Vision, architecture, ADRs, roadmap, cost model |
@@ -57,12 +58,26 @@ docs: Add cost model
 
 - GitHub Actions.
 - Azure login through OIDC federation. No stored cloud secrets.
-- Required checks on each pull request:
-  - Lint and tests for Go and Python
-  - `terraform fmt`, `terraform validate`, `tflint`
-  - `govulncheck`
-  - Image and IaC scan
-  - Secret scan
+- Required checks on each pull request and each push to `main`, with no path filter. Each job runs the `make` target that a developer runs locally:
+
+  | Check | Workflow | Command |
+  |---|---|---|
+  | `go` | `ci.yml` | `make lint-go`, `make test-go` |
+  | `python` | `ci.yml` | `make lint-python`, `make test-python` |
+  | `govulncheck` | `ci.yml` | `make vuln` |
+  | `secrets` | `ci.yml` | `make secrets` |
+  | `actionlint` | `ci.yml` | `make lint-actions` |
+  | `agentgateway compatibility test` | `extmcp.yml` | `make e2e` |
+
+- Checks that start in Phase 2: `terraform fmt`, `terraform validate`, `tflint`, and the image and IaC scan.
+- Each `uses:` line names a full commit SHA, with the version in a comment. Dependabot proposes updates of the actions, the Go modules and the Python packages each month.
+- The ruleset on `main` is the file `.github/rulesets/main.json`: a pull request is required, each check above is required, and no account can bypass it. Change the file in a pull request, then apply it:
+
+  ```sh
+  gh api --method PUT repos/vanlabs-dev/agent-gate/rulesets/<id> --input .github/rulesets/main.json
+  ```
+
+  `gh api repos/vanlabs-dev/agent-gate/rulesets` lists the `<id>`.
 - Terraform plan runs on the pull request. Apply runs on merge, behind an environment approval.
 - Each change is tested on `kind` in CI.
 
@@ -73,7 +88,8 @@ One environment, `demo`. `kind` in CI takes the place of a staging cluster.
 ## Dependencies
 
 - Pin agentgateway and the `ExtMcp` bindings to an exact version. The versions are in `test/extmcp/versions.env` and `test/extmcp/go.mod`.
-- Upgrade through the compatibility test, `make test`, not by a floating tag.
+- Upgrade through the compatibility test, `make e2e`, not by a floating tag.
+- Dependabot does not update the check tools in `versions.env`, the Go version in `go.mod` or `test/extmcp/versions.env`. Update them by hand, one line at a time, and run `make check`.
 
 ## Secrets
 

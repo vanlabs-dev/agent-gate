@@ -1,2 +1,7 @@
 test/extmcp/.kube/
 test/extmcp/e2e.log
+.venv/
+__pycache__/
+*.pyc
+.ruff_cache/
+.pytest_cache/
