@@ -29,7 +29,7 @@ Tasks marked **Maintainer** change a GitHub setting. The agent writes the comman
 - [ ] 4.3 Add `.github/dependabot.yml` (design decision 8). Verify: after the merge in task 5.1, the Dependabot page of the repo lists three entries with no config error, and its log shows one finished run for each entry
 - [x] 4.4 Add `.github/pull_request_template.md` (design decision 10) and `.github/rulesets/main.json` (design decision 9). Verify: `jq . .github/rulesets/main.json` parses, the bypass list is empty, and the six check names equal the job names of design decision 5
 - [x] 4.5 Update the "CI and CD" and "Repo layout" sections of `docs/conventions.md`: the checks that exist now, the checks that start in Phase 2, the root `versions.env`, `agents/azure-ops/` as an existing path, and the command that updates the ruleset from its file (design decision 9). Verify: each check named as existing is a job in a workflow file
-- [ ] 4.6 Open the pull request from `repo-foundations`. Verify: `gh pr checks` shows the six checks of design decision 5 as passed, with those exact names, and the log of the job `python` shows the `uv` version that `required-version` names
+- [x] 4.6 Open the pull request from `repo-foundations`. Verify: `gh pr checks` shows the six checks of design decision 5 as passed, with those exact names, and the log of the job `python` shows the `uv` version that `required-version` names
 
 ## 5. Merge
 
