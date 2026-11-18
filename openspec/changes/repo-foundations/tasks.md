@@ -26,18 +26,18 @@ Tasks marked **Maintainer** change a GitHub setting. The agent writes the comman
 
 - [x] 4.1 Pin the three actions in `.github/workflows/extmcp.yml` by commit SHA with a version comment, and change its command to `make e2e`. Verify: each SHA is the commit of the named tag, read with `gh api repos/<owner>/<repo>/git/ref/tags/<tag>`
 - [x] 4.2 Add `.github/workflows/ci.yml` with the five jobs of design decision 5, each action pinned by SHA. `astral-sh/setup-uv` gets `working-directory: agents/azure-ops` (design decision 4). Verify: `make lint-actions` exits 0, and `grep -rn 'uses:' .github/workflows` shows a 40-character SHA on each line
-- [ ] 4.3 Add `.github/dependabot.yml` (design decision 8). Verify: after the merge in task 5.1, the Dependabot page of the repo lists three entries with no config error, and its log shows one finished run for each entry
+- [x] 4.3 Add `.github/dependabot.yml` (design decision 8). Verify: after the merge in task 5.1, the Dependabot page of the repo lists three entries with no config error, and its log shows one finished run for each entry
 - [x] 4.4 Add `.github/pull_request_template.md` (design decision 10) and `.github/rulesets/main.json` (design decision 9). Verify: `jq . .github/rulesets/main.json` parses, the bypass list is empty, and the six check names equal the job names of design decision 5
 - [x] 4.5 Update the "CI and CD" and "Repo layout" sections of `docs/conventions.md`: the checks that exist now, the checks that start in Phase 2, the root `versions.env`, `agents/azure-ops/` as an existing path, and the command that updates the ruleset from its file (design decision 9). Verify: each check named as existing is a job in a workflow file
 - [x] 4.6 Open the pull request from `repo-foundations`. Verify: `gh pr checks` shows the six checks of design decision 5 as passed, with those exact names, and the log of the job `python` shows the `uv` version that `required-version` names
 
 ## 5. Merge
 
-- [ ] 5.1 **Maintainer:** merge the pull request of task 4.6. Verify: the six checks pass on `main`
+- [x] 5.1 **Maintainer:** merge the pull request of task 4.6. Verify: the six checks pass on `main`
 
 ## 6. Proof of a failed check
 
-- [ ] 6.1 Create the branch `demo/failed-checks` from `main` with the three commits of design decision 11 and open a pull request. Verify: `gh pr checks` shows `go`, `python` and `secrets` as failed and the other three checks as passed, and each failed log names the planted defect. Record the pull request number in `docs/greenfield/repo-foundations/08-verify.md`
+- [x] 6.1 Create the branch `demo/failed-checks` from `main` with the three commits of design decision 11 and open a pull request. Verify: `gh pr checks` shows `go`, `python` and `secrets` as failed and the other three checks as passed, and each failed log names the planted defect. Record the pull request number in `docs/greenfield/repo-foundations/08-verify.md`
 
 ## 7. Protection of main
 
