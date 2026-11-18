@@ -34,3 +34,5 @@ Phase 1 starts the gate. The repo has one CI job and no lint, no fast test comma
 - **Development machine:** a `uv`-managed Python interpreter and a virtual environment in `agents/azure-ops/.venv`. No new tool binaries.
 - **Outside the machine:** one ruleset on `main` and two repo settings (secret scanning with push protection, Dependabot security updates). The maintainer applies all three.
 - **Cost:** none. No cloud resources.
+
+Approved: 2026-11-18 (vanlabs-dev)
