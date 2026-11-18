@@ -31,7 +31,7 @@ jobs:
           tar -xzf "${archive}"
           sudo install linux-amd64/helm /usr/local/bin/helm
           helm version --short
-      - run: make test
+      - run: make e2e
       - name: Collect cluster state
         if: failure()
         run: |

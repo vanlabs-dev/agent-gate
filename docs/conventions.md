@@ -73,7 +73,7 @@ One environment, `demo`. `kind` in CI takes the place of a staging cluster.
 ## Dependencies
 
 - Pin agentgateway and the `ExtMcp` bindings to an exact version. The versions are in `test/extmcp/versions.env` and `test/extmcp/go.mod`.
-- Upgrade through the compatibility test, `make test`, not by a floating tag.
+- Upgrade through the compatibility test, `make e2e`, not by a floating tag.
 
 ## Secrets
 

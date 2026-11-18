@@ -25,7 +25,7 @@ Option 1. The gate is an `ExtMcp` server. Policy, approval and audit code stay i
 ## Consequences
 
 - The gate cannot suspend a call. See [ADR 0009](0009-suspension-deny-and-replay.md).
-- The project depends on a young API. The agentgateway version is pinned in `test/extmcp/versions.env`. An upgrade must pass the compatibility test, `make test`.
+- The project depends on a young API. The agentgateway version is pinned in `test/extmcp/versions.env`. An upgrade must pass the compatibility test, `make e2e`.
 - Routes must attach a `jwtAuthentication` policy, or the gate receives no claims ([issue #3485](https://github.com/agentgateway/agentgateway/issues/3485)).
 - The callout needs an explicit deadline.
 

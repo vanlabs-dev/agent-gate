@@ -97,7 +97,7 @@ The full contract is in the [spec](openspec/specs/agentgateway-integration/spec.
 Required tools: Go, Docker, `kind`, `kubectl`, Helm 4 and `make`. Versions are pinned in [`test/extmcp/versions.env`](test/extmcp/versions.env).
 
 ```sh
-make test
+make e2e
 ```
 
 The command creates the `kind` cluster `agent-gate-extmcp`, deploys the pinned agentgateway with both stubs, and runs each scenario. It exits 0 only when every scenario passes. It takes about one minute, and keeps its kubeconfig in `test/extmcp/.kube/`.
