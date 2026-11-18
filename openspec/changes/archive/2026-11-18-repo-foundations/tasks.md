@@ -26,27 +26,27 @@ Tasks marked **Maintainer** change a GitHub setting. The agent writes the comman
 
 - [x] 4.1 Pin the three actions in `.github/workflows/extmcp.yml` by commit SHA with a version comment, and change its command to `make e2e`. Verify: each SHA is the commit of the named tag, read with `gh api repos/<owner>/<repo>/git/ref/tags/<tag>`
 - [x] 4.2 Add `.github/workflows/ci.yml` with the five jobs of design decision 5, each action pinned by SHA. `astral-sh/setup-uv` gets `working-directory: agents/azure-ops` (design decision 4). Verify: `make lint-actions` exits 0, and `grep -rn 'uses:' .github/workflows` shows a 40-character SHA on each line
-- [ ] 4.3 Add `.github/dependabot.yml` (design decision 8). Verify: after the merge in task 5.1, the Dependabot page of the repo lists three entries with no config error, and its log shows one finished run for each entry
+- [x] 4.3 Add `.github/dependabot.yml` (design decision 8). Verify: after the merge in task 5.1, the Dependabot page of the repo lists three entries with no config error, and its log shows one finished run for each entry
 - [x] 4.4 Add `.github/pull_request_template.md` (design decision 10) and `.github/rulesets/main.json` (design decision 9). Verify: `jq . .github/rulesets/main.json` parses, the bypass list is empty, and the six check names equal the job names of design decision 5
 - [x] 4.5 Update the "CI and CD" and "Repo layout" sections of `docs/conventions.md`: the checks that exist now, the checks that start in Phase 2, the root `versions.env`, `agents/azure-ops/` as an existing path, and the command that updates the ruleset from its file (design decision 9). Verify: each check named as existing is a job in a workflow file
 - [x] 4.6 Open the pull request from `repo-foundations`. Verify: `gh pr checks` shows the six checks of design decision 5 as passed, with those exact names, and the log of the job `python` shows the `uv` version that `required-version` names
 
 ## 5. Merge
 
-- [ ] 5.1 **Maintainer:** merge the pull request of task 4.6. Verify: the six checks pass on `main`
+- [x] 5.1 **Maintainer:** merge the pull request of task 4.6. Verify: the six checks pass on `main`
 
 ## 6. Proof of a failed check
 
-- [ ] 6.1 Create the branch `demo/failed-checks` from `main` with the three commits of design decision 11 and open a pull request. Verify: `gh pr checks` shows `go`, `python` and `secrets` as failed and the other three checks as passed, and each failed log names the planted defect. Record the pull request number in `docs/greenfield/repo-foundations/08-verify.md`
+- [x] 6.1 Create the branch `demo/failed-checks` from `main` with the three commits of design decision 11 and open a pull request. Verify: `gh pr checks` shows `go`, `python` and `secrets` as failed and the other three checks as passed, and each failed log names the planted defect. Record the pull request number in `docs/greenfield/repo-foundations/08-verify.md`
 
 ## 7. Protection of main
 
-- [ ] 7.1 **Maintainer:** apply the ruleset with the `POST` command in design decision 9. Verify: `gh api repos/vanlabs-dev/agent-gate/rulesets` lists one active ruleset, and its rules and check names equal the file
-- [ ] 7.2 **Maintainer:** push one empty commit to `main` directly, with a subject that can stay in the history. Verify: GitHub rejects the push. Record the output in `08-verify.md`. If the push passes, stop: leave the commit, do not force push, and correct the ruleset
-- [ ] 7.3 Read the merge state of the demo pull request. Verify: `gh pr view <number> --json mergeStateStatus` prints `BLOCKED`. Then close the pull request and delete the branch `demo/failed-checks`
-- [ ] 7.4 **Maintainer:** enable Dependabot security updates. Secret scanning and push protection are on already. Verify: `gh api repos/vanlabs-dev/agent-gate --jq .security_and_analysis` shows `secret_scanning`, `secret_scanning_push_protection` and `dependabot_security_updates` as `enabled`
+- [x] 7.1 **Maintainer:** apply the ruleset with the `POST` command in design decision 9. Verify: `gh api repos/vanlabs-dev/agent-gate/rulesets` lists one active ruleset, and its rules and check names equal the file
+- [x] 7.2 **Maintainer:** push one empty commit to `main` directly, with a subject that can stay in the history. Verify: GitHub rejects the push. Record the output in `08-verify.md`. If the push passes, stop: leave the commit, do not force push, and correct the ruleset
+- [x] 7.3 Read the merge state of the demo pull request. Verify: `gh pr view <number> --json mergeStateStatus` prints `BLOCKED`. Then close the pull request and delete the branch `demo/failed-checks`
+- [x] 7.4 **Maintainer:** enable Dependabot security updates. Secret scanning and push protection are on already. Verify: `gh api repos/vanlabs-dev/agent-gate --jq .security_and_analysis` shows `secret_scanning`, `secret_scanning_push_protection` and `dependabot_security_updates` as `enabled`
 
 ## 8. Close Phase 0
 
-- [ ] 8.1 Update the Status section of `docs/vision.md`, the status badge in `README.md`, and the roadmap where it states the current phase: Phase 0 is complete, and Phase 1 is next. Remove the roadmap checkpoint "End of Phase 0", which the spike has decided. Verify: no doc says that Phase 0 is in progress
-- [ ] 8.2 Open the second pull request with the verify output, the ship note, the archive and the docs of task 8.1. `08-verify.md` holds the output of the verify script and, below it, the output of `make check`. Verify: the six checks pass, the main spec `openspec/specs/agentgateway-integration/spec.md` names `make e2e`, and the maintainer merges the pull request through the ruleset with no bypass
+- [x] 8.1 Update the Status section of `docs/vision.md`, the status badge in `README.md`, and the roadmap where it states the current phase: Phase 0 is complete, and Phase 1 is next. Remove the roadmap checkpoint "End of Phase 0", which the spike has decided. Verify: no doc says that Phase 0 is in progress
+- [x] 8.2 Open the second pull request with the verify output, the ship note, the archive and the docs of task 8.1. `08-verify.md` holds the output of the verify script and, below it, the output of `make check`. Verify: the six checks pass, the main spec `openspec/specs/agentgateway-integration/spec.md` names `make e2e`, and the maintainer merges the pull request through the ruleset with no bypass. Checked off at the archive, which is part of this pull request: the merge through the ruleset is its last step
