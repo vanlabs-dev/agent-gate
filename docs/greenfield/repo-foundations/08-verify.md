@@ -40,3 +40,74 @@ remote: - Changes must be made through a pull request.
 remote: - 6 of 6 required status checks are expected.
  ! [remote rejected] main -> main (push declined due to repository rule violations)
 ```
+
+| Task | Result |
+|---|---|
+| 7.4 | `security_and_analysis`: `secret_scanning`, `secret_scanning_push_protection` and `dependabot_security_updates` are `enabled`. GitHub requires vulnerability alerts first: `PUT repos/vanlabs-dev/agent-gate/vulnerability-alerts`, then `PUT .../automated-security-fixes` |
+| 8.1 | No doc says that Phase 0 is in progress. The checkpoint "End of Phase 0" is removed |
+
+## Verify script
+
+`bash ~/.claude/skills/greenfield/scripts/verify.sh repo-foundations .`, run on the branch `repo-foundations-close` before the archive.
+
+```text
+=== greenfield verify: repo-foundations ===
+Project root: ~/src/github/vanlabs-dev/agent-gate
+Artifact dir: ~/src/github/vanlabs-dev/agent-gate/docs/greenfield/repo-foundations
+
+Checking greenfield artifacts...
+  OK  01-brainstorm.md
+  OK  07-review.md
+  note  09-ship.md not present yet
+
+Checking OpenSpec change...
+  OK  openspec/changes/repo-foundations
+
+Running project checks (if present)...
+go test test/extmcp
+ok  	github.com/vanlabs-dev/agent-gate/test/extmcp/cmd/stub-gate	0.007s
+ok  	github.com/vanlabs-dev/agent-gate/test/extmcp/cmd/stub-mcp	0.005s
+cd agents/azure-ops && uv run --locked pytest
+   Building azure-ops @ file://~/src/github/vanlabs-dev/agent-gate/agents/azure-ops
+      Built azure-ops @ file://~/src/github/vanlabs-dev/agent-gate/agents/azure-ops
+Uninstalled 1 package in 0.18ms
+Installed 1 package in 0.39ms
+============================= test session starts ==============================
+platform linux -- Python 3.14.10, pytest-9.2.0, pluggy-1.7.0
+rootdir: ~/src/github/vanlabs-dev/agent-gate/agents/azure-ops
+configfile: pyproject.toml
+collected 1 item
+
+tests/test_smoke.py .                                                    [100%]
+
+============================== 1 passed in 0.01s ===============================
+  OK  make test
+
+RESULT: PASS
+verify exit 0
+```
+
+## make check
+
+```text
+golangci-lint test/extmcp
+0 issues.
+cd agents/azure-ops && uv run --locked ruff check && uv run --locked ruff format --check
+All checks passed!
+2 files already formatted
+go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 -shellcheck= -pyflakes=
+go test test/extmcp
+ok  	github.com/vanlabs-dev/agent-gate/test/extmcp/cmd/stub-gate	0.007s
+ok  	github.com/vanlabs-dev/agent-gate/test/extmcp/cmd/stub-mcp	0.005s
+cd agents/azure-ops && uv run --locked pytest
+============================= test session starts ==============================
+platform linux -- Python 3.14.10, pytest-9.2.0, pluggy-1.7.0
+rootdir: ~/src/github/vanlabs-dev/agent-gate/agents/azure-ops
+configfile: pyproject.toml
+collected 1 item
+
+tests/test_smoke.py .                                                    [100%]
+
+============================== 1 passed in 0.01s ===============================
+make check exit 0
+```

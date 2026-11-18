@@ -8,7 +8,7 @@ Policy, approval and verifiable audit for MCP tool calls, as an [agentgateway](h
 
 [![Compatibility test](https://github.com/vanlabs-dev/agent-gate/actions/workflows/extmcp.yml/badge.svg?branch=main)](https://github.com/vanlabs-dev/agent-gate/actions/workflows/extmcp.yml)
 [![Licence](https://img.shields.io/badge/licence-Apache--2.0-blue?style=flat-square)](LICENSE)
-[![Status](https://img.shields.io/badge/status-phase%200-orange?style=flat-square)](docs/roadmap.md)
+[![Status](https://img.shields.io/badge/status-phase%201-orange?style=flat-square)](docs/roadmap.md)
 
 [![Go](https://img.shields.io/badge/Go-1.27-00ADD8?style=flat-square&logo=go&logoColor=white)](test/extmcp/go.mod)
 [![agentgateway](https://img.shields.io/badge/agentgateway-v1.7.0-6E56CF?style=flat-square)](test/extmcp/versions.env)
@@ -43,7 +43,7 @@ Gateways route, authenticate and rate-limit agent traffic. agent-gate adds the h
 ## Status
 
 > [!NOTE]
-> Phase 0 of the [roadmap](docs/roadmap.md). The integration with agentgateway is proven by a compatibility test, with a stub in place of the gate. The gate does not exist yet.
+> Phase 1 of the [roadmap](docs/roadmap.md) is next. Phase 0 is complete. The integration with agentgateway is proven by a compatibility test, with a stub in place of the gate. The gate does not exist yet.
 
 ## How it works
 
@@ -149,8 +149,8 @@ A team that does not run agentgateway or Entra should look at [Preloop](https://
 
 | Phase | Ships | State |
 |---|---|---|
-| 0 Foundations | Repo, conventions, CI, and the agentgateway spike | In progress |
-| 1 Core on `kind` | Policy engine, approvals, replay, hash-chained audit, verifier CLI, minimal inbox | Planned |
+| 0 Foundations | Repo, conventions, CI, and the agentgateway spike | Done |
+| 1 Core on `kind` | Policy engine, approvals, replay, hash-chained audit, verifier CLI, minimal inbox | Next |
 | 2 Azure | Terraform, AKS, keyless deploy, Entra token checks | Planned |
 | 3 Agent and demo | Python ops agent with one real action, guest sign-in, guided tour | Planned |
 

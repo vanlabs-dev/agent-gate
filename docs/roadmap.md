@@ -2,6 +2,8 @@
 
 The plan assumes about 10 hours a week from one maintainer. The order puts the largest technical risk first and delays cloud cost until the core works.
 
+Phase 0 was completed on 2026-11-18. Phase 1 is next.
+
 | Phase | Weeks | Ships | Exit test |
 |---|---|---|---|
 | 0 Foundations | 1 to 2 | Public repo, conventions, CI for Go and Python. Build, test and lint commands in `AGENTS.md`. Spike on `kind`: agentgateway calls a stub gate, and a deny followed by a replay works | The spike passes in CI. ADR 0002 and 0009 are confirmed or changed |
@@ -19,7 +21,6 @@ The end of Phase 3. A visitor can watch an agent propose an action, see a human 
 ## Checkpoints
 
 - **On or after 2026-11-23:** review ADR 0001 and 0002 against Microsoft Ignite 2026 announcements.
-- **End of Phase 0:** the spike result decides whether option A stands.
 - **End of Phase 2:** the first real bill decides whether the cost model stands.
 
 ## Out of scope until Phase 5

@@ -1,7 +1,7 @@
 # Review: repo-foundations
 
 - Date: 2026-11-18
-- Session: 3, outside voice. Inputs: the [brainstorm](01-brainstorm.md), the [OpenSpec change](../../../openspec/changes/repo-foundations/) and the project docs. No chat history.
+- Session: 3, outside voice. Inputs: the [brainstorm](01-brainstorm.md), the [OpenSpec change](../../../openspec/changes/archive/2026-11-18-repo-foundations/) and the project docs. No chat history.
 - Checks: the four pinned tools were run with `go run <module>@<version>` on Go 1.27.4. The repo settings were read with `gh api`. The greenfield verify script and the `astral-sh/setup-uv` README were read. All on 2026-11-18.
 
 ## Verdict
