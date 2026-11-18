@@ -19,16 +19,16 @@ Tasks marked **Maintainer** change a GitHub setting. The agent writes the comman
 ## 3. Workflow lint, secret scan and the joined targets
 
 - [x] 3.1 Add `lint-actions` with `-shellcheck= -pyflakes=` and `secrets` with `--log-opts="--full-history HEAD"` (design decisions 2 and 6). Verify: both exit 0, and `make secrets` reports the number of commits it scanned. Then commit a fake key (design decision 11) on a local branch that is not checked out: `make secrets` still exits 0. Delete that branch
-- [ ] 3.2 Add `test`, `lint` and `check` (design decision 1). Verify: on a clean clone in `~/scratch/`, `make lint`, `make test` and `make check` each exit 0, `make test` takes under 30 s, and `kind get clusters` shows no new cluster
-- [ ] 3.3 Add a "Commands" section to `AGENTS.md` with the targets of design decision 1 and the tools each needs. Add the same commands to `README.md`. Verify: each target in the list exists in the `Makefile`, and each exits 0
+- [x] 3.2 Add `test`, `lint` and `check` (design decision 1). Verify: on a clean clone in `~/scratch/`, `make lint`, `make test` and `make check` each exit 0, `make test` takes under 30 s, and `kind get clusters` shows no new cluster
+- [x] 3.3 Add a "Commands" section to `AGENTS.md` with the targets of design decision 1 and the tools each needs. Add the same commands to `README.md`. Verify: each target in the list exists in the `Makefile`, and each exits 0
 
 ## 4. CI, pins and updates
 
-- [ ] 4.1 Pin the three actions in `.github/workflows/extmcp.yml` by commit SHA with a version comment, and change its command to `make e2e`. Verify: each SHA is the commit of the named tag, read with `gh api repos/<owner>/<repo>/git/ref/tags/<tag>`
-- [ ] 4.2 Add `.github/workflows/ci.yml` with the five jobs of design decision 5, each action pinned by SHA. `astral-sh/setup-uv` gets `working-directory: agents/azure-ops` (design decision 4). Verify: `make lint-actions` exits 0, and `grep -rn 'uses:' .github/workflows` shows a 40-character SHA on each line
+- [x] 4.1 Pin the three actions in `.github/workflows/extmcp.yml` by commit SHA with a version comment, and change its command to `make e2e`. Verify: each SHA is the commit of the named tag, read with `gh api repos/<owner>/<repo>/git/ref/tags/<tag>`
+- [x] 4.2 Add `.github/workflows/ci.yml` with the five jobs of design decision 5, each action pinned by SHA. `astral-sh/setup-uv` gets `working-directory: agents/azure-ops` (design decision 4). Verify: `make lint-actions` exits 0, and `grep -rn 'uses:' .github/workflows` shows a 40-character SHA on each line
 - [ ] 4.3 Add `.github/dependabot.yml` (design decision 8). Verify: after the merge in task 5.1, the Dependabot page of the repo lists three entries with no config error, and its log shows one finished run for each entry
-- [ ] 4.4 Add `.github/pull_request_template.md` (design decision 10) and `.github/rulesets/main.json` (design decision 9). Verify: `jq . .github/rulesets/main.json` parses, the bypass list is empty, and the six check names equal the job names of design decision 5
-- [ ] 4.5 Update the "CI and CD" and "Repo layout" sections of `docs/conventions.md`: the checks that exist now, the checks that start in Phase 2, the root `versions.env`, `agents/azure-ops/` as an existing path, and the command that updates the ruleset from its file (design decision 9). Verify: each check named as existing is a job in a workflow file
+- [x] 4.4 Add `.github/pull_request_template.md` (design decision 10) and `.github/rulesets/main.json` (design decision 9). Verify: `jq . .github/rulesets/main.json` parses, the bypass list is empty, and the six check names equal the job names of design decision 5
+- [x] 4.5 Update the "CI and CD" and "Repo layout" sections of `docs/conventions.md`: the checks that exist now, the checks that start in Phase 2, the root `versions.env`, `agents/azure-ops/` as an existing path, and the command that updates the ruleset from its file (design decision 9). Verify: each check named as existing is a job in a workflow file
 - [ ] 4.6 Open the pull request from `repo-foundations`. Verify: `gh pr checks` shows the six checks of design decision 5 as passed, with those exact names, and the log of the job `python` shows the `uv` version that `required-version` names
 
 ## 5. Merge
