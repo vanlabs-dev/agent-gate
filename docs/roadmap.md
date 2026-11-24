@@ -20,7 +20,6 @@ The end of Phase 3. A visitor can watch an agent propose an action, see a human 
 
 ## Checkpoints
 
-- **On or after 2026-11-23:** review ADR 0001 and 0002 against Microsoft Ignite 2026 announcements.
 - **End of Phase 2:** the first real bill decides whether the cost model stands.
 
 ## Out of scope until Phase 5

@@ -2,7 +2,7 @@
 
 - Status: Accepted, confirmed by the Phase 0 spike on 2026-11-16 against agentgateway v1.7.0
 - Date: 2026-11-16
-- Review: on or after 2026-11-23
+- Review: 2026-11-24, the decision stands. Next at each agentgateway upgrade
 
 ## Context
 
@@ -40,3 +40,12 @@ The compatibility test in `test/extmcp/` passed on `kind` on 2026-11-16 against 
 - A gate outage fails closed. The client receives the JSON-RPC internal error `guardrail check failed`, and the upstream server receives no call.
 
 Source for each finding: the agentgateway [v1.7.0 source](https://github.com/agentgateway/agentgateway/blob/v1.7.0/crates/agentgateway/src/mcp/guardrails), read on 2026-11-16, and the test result.
+
+## Review 2026-11-24
+
+Checked on 2026-11-24. Nothing changes the integration.
+
+- v1.7.0 is still the latest [release](https://github.com/agentgateway/agentgateway/releases).
+- `ext_mcp.proto` has no commit on `main` since v1.7.0. One commit touches the guardrails code: [`6dbb06b8`](https://github.com/agentgateway/agentgateway/commit/6dbb06b8) adds the method names of the MCP Skills extension.
+- Issues #3003, #3485 and #4245 are open.
+- No Ignite 2026 announcement names agentgateway. Agent 365 MCP governance supports Azure AI Gateway and LiteLLM, in preview ([Agent 365](https://techcommunity.microsoft.com/blog/agent-365-blog/whats-new-in-microsoft-agent-365-ignite-2026/4571753)).
