@@ -158,10 +158,9 @@ The policy, approval and audit code must not depend on `ExtMcp` types. The exten
 
 | Decision | Options | Lean |
 |---|---|---|
-| Policy engine, and how "needs approval" is expressed | Cedar (`cedar-go`) with a second action, OPA with a decision document | Decide in Phase 1 |
 | State store | Postgres in the cluster on a disk, Azure Flexible Server B1ms | In-cluster first: US$3 against US$19 a month |
 | LLM routing and budgets | agentgateway, LiteLLM | agentgateway: one data plane, fewer pods |
 | Observability | OTel Collector to Application Insights, self-hosted Langfuse | Application Insights: no cluster memory, 5 GB free |
 | Deploy | Helm from GitHub Actions, Flux | Helm first |
 
-Each of these becomes an ADR when it is decided.
+Each of these becomes an ADR when it is decided. The policy engine is OPA ([ADR 0010](../adr/0010-policy-engine-opa.md)).

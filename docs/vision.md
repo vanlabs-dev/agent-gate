@@ -76,4 +76,4 @@ This repo is also a public portfolio. Each claim in it must link to evidence:
 
 ## Status
 
-Phase 0 of the [roadmap](roadmap.md) is complete, and Phase 1 is next. A compatibility test on `kind` proves the integration with agentgateway ([ADR 0002](adr/0002-integrate-through-agentgateway-extmcp.md)). No gate exists yet.
+Phase 0 of the [roadmap](roadmap.md) is complete, and Phase 1 started on 2026-11-24. A compatibility test on `kind` proves the integration with agentgateway ([ADR 0002](adr/0002-integrate-through-agentgateway-extmcp.md)). No gate exists yet.
