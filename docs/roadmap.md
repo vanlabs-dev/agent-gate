@@ -2,7 +2,7 @@
 
 The plan assumes about 10 hours a week from one maintainer. The order puts the largest technical risk first and delays cloud cost until the core works.
 
-Phase 0 was completed on 2026-11-18. Phase 1 is next.
+Phase 0 was completed on 2026-11-18. Phase 1 started on 2026-11-24 with the `gate-core` change.
 
 | Phase | Weeks | Ships | Exit test |
 |---|---|---|---|
