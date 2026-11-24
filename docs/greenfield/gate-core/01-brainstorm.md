@@ -55,7 +55,7 @@ A Go module in `gate/` with the core packages (policy, approval, audit, canonica
 
 ## Open questions
 
-For the proposal session.
+All six were answered in the proposal session on 2026-11-25. The answers are in the [design](../../../openspec/changes/gate-core/design.md#answers-to-the-brainstorms-open-questions).
 
 1. Does the real gate replace the stub gate in `test/extmcp/`, or does the compatibility test keep its stub and the gate get its own end-to-end test?
 2. Which local OIDC issuer: an existing one such as Dex, or a small Go issuer? It must also serve sign-in for `approval-inbox`.
