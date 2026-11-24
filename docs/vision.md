@@ -34,19 +34,20 @@ agent-gate is not a gateway. It plugs into one.
 
 ## Prior art
 
-Two open-source projects cover much of this ground. Both were read from source on 2026-11-16: Preloop v1.0.2 and the Microsoft Agent Governance Toolkit v5.0.0.
+Three open-source projects cover parts of this ground. Preloop v1.0.2 and the Microsoft Agent Governance Toolkit v5.0.0 were read from source on 2026-11-16. capsule-emit was checked on 2026-11-24.
 
 - [Preloop](https://github.com/preloop/preloop) (Apache-2.0) is an agent control plane and its own MCP proxy. It holds tool calls for approval under CEL rules, notifies approvers through several channels, and keeps a signed audit hash chain with an offline verifier.
 - [Microsoft Agent Governance Toolkit](https://github.com/microsoft/agent-governance-toolkit) (MIT) is mainly a library inside the agent process. It has a `require_approval` policy action and a protocol that binds an approval to a digest of the action.
+- [capsule-emit](https://github.com/action-state-group/capsule-emit) (Apache-2.0) seals agent actions into signed, hash-chained records that anyone can verify offline. Its `ExtMcp` processor does this for each `tools/call` through agentgateway ([issue #3485](https://github.com/agentgateway/agentgateway/issues/3485)). It has no policy and no approval.
 
 agent-gate differs in four ways. Each difference is narrow.
 
-| | agent-gate (planned) | Preloop | Microsoft toolkit |
-|---|---|---|---|
-| Where it enforces | Inside agentgateway, as an extension | In its own MCP proxy | Inside the agent process, plus one Azure API Management sample |
-| Entra Agent ID claims in policy | Yes | No | Verifies Entra tokens, but policy does not use the agent-type claims |
-| Approver cannot be the requester | For every gated call | For one built-in tool | No such rule |
-| Audit anchored outside the system | Automatic, to immutable storage | Signed checkpoints, but the key is stored with the data and export is manual | Not implemented |
+| | agent-gate (planned) | Preloop | Microsoft toolkit | capsule-emit |
+|---|---|---|---|---|
+| Where it enforces | Inside agentgateway, as an extension | In its own MCP proxy | Inside the agent process, plus one Azure API Management sample | Records only, inside agentgateway as an extension |
+| Entra Agent ID claims in policy | Yes | No | Verifies Entra tokens, but policy does not use the agent-type claims | No policy. Records the JWT subject |
+| Approver cannot be the requester | For every gated call | For one built-in tool | No such rule | No approval |
+| Audit anchored outside the system | Automatic, to immutable storage | Signed checkpoints, but the key is stored with the data and export is manual | Not implemented | Checkpoints at an outside witness log |
 
 A team that does not run agentgateway or Entra should look at Preloop first.
 
