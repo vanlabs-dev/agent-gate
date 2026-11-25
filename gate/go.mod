@@ -7,6 +7,7 @@ require (
 	github.com/coreos/go-oidc/v3 v3.21.0
 	github.com/go-jose/go-jose/v4 v4.1.9
 	github.com/gowebpki/jcs v1.0.2
+	github.com/jackc/pgx/v5 v5.13.0
 	github.com/open-policy-agent/opa v1.22.4
 )
 
@@ -18,6 +19,9 @@ require (
 	github.com/goccy/go-json v0.11.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
+	github.com/jackc/puddle/v2 v2.2.3 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.4 // indirect
 	github.com/lestrrat-go/dsig v1.4.0 // indirect
 	github.com/lestrrat-go/dsig-secp256k1 v1.0.0 // indirect

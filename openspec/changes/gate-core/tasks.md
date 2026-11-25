@@ -29,7 +29,7 @@ Work on the branch `gate-core`. Run `make check` before each push.
 
 ## 6. Postgres
 
-- [ ] 6.1 Write `internal/postgres`: embedded migrations, the `Store`, the audit appender with the advisory lock, and checkpoints (design decisions 5 and 7). Add `export --dsn` to `agent-gate-audit`. The tests create and use their own database `agent_gate_pgtest`. Verify: tests with the build tag `pgtest` pass against a local Postgres container in scratch, including concurrent replays (exactly one passes) and 50 concurrent appends (the export verifies)
+- [x] 6.1 Write `internal/postgres`: embedded migrations, the `Store`, the audit appender with the advisory lock, and checkpoints (design decisions 5 and 7). Add `export --dsn` to `agent-gate-audit`. The tests create and use their own database `agent_gate_pgtest`. Verify: tests with the build tag `pgtest` pass against a local Postgres container in scratch, including concurrent replays (exactly one passes) and 50 concurrent appends (the export verifies)
 
 ## 7. Server
 
