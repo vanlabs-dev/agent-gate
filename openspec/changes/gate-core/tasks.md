@@ -19,7 +19,7 @@ Work on the branch `gate-core`. Run `make check` before each push.
 
 ## 4. Audit
 
-- [ ] 4.1 Write `internal/audit`: the entry and checkpoint types, the hash functions and `Verify` (design decisions 7 and 8). Verify: unit tests pass for an untouched chain, a changed entry, a removed entry, swapped entries, a removed tail, and a changed checkpoint
+- [x] 4.1 Write `internal/audit`: the entry and checkpoint types, the hash functions and `Verify` (design decisions 7 and 8). Verify: unit tests pass for an untouched chain, a changed entry, a removed entry, swapped entries, a removed tail, and a changed checkpoint
 - [ ] 4.2 Write `cmd/agent-gate-audit` with `verify <file>`. Verify: a test runs it on a fixture and on each tampered fixture and checks the exit code and the named `seq`
 
 ## 5. Approval core
