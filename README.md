@@ -115,10 +115,10 @@ Required tools: Go, Docker, `kind`, `kubectl`, Helm 4 and `make`. Versions are p
 make e2e
 ```
 
-The command creates the `kind` cluster `agent-gate-extmcp`, deploys the pinned agentgateway with both stubs, and runs each scenario. It exits 0 only when every scenario passes. It takes about one minute, and keeps its kubeconfig in `test/extmcp/.kube/`.
+The command creates the `kind` cluster `agent-gate-extmcp`, deploys the pinned agentgateway with both stubs, and runs each scenario. It exits 0 only when every scenario passes. It takes a few minutes, and keeps its kubeconfig in `test/extmcp/.kube/`.
 
 ```text
---- PASS: TestE2E (1.68s)
+--- PASS: TestE2E (6.57s)
     --- PASS: TestE2E/Ungated_tool (0.01s)
     --- PASS: TestE2E/First_call_to_a_gated_tool (0.00s)
     --- PASS: TestE2E/Replay_after_approval (0.01s)
@@ -129,7 +129,8 @@ The command creates the `kind` cluster `agent-gate-extmcp`, deploys the pinned a
     --- PASS: TestE2E/Call_with_a_token_that_fails_validation (0.00s)
     --- PASS: TestE2E/Call_with_no_token (0.00s)
     --- PASS: TestE2E/Result_of_a_passed_call (0.00s)
-    --- PASS: TestE2E/Gate_unavailable (1.62s)
+    --- PASS: TestE2E/Gate_slower_than_the_deadline (5.01s)
+    --- PASS: TestE2E/Gate_unavailable (1.51s)
 ```
 
 ```sh
