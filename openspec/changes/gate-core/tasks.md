@@ -38,7 +38,7 @@ Work on the branch `gate-core`. Run `make check` before each push.
 
 ## 8. Callout deadline in the contract test
 
-- [ ] 8.1 Add `POST /delay` to `test/extmcp/cmd/stub-gate` and the scenario "Gate slower than the deadline" to `test/extmcp/e2e_test.go` (design decision 11). Verify: `make e2e` passes and logs the measured time. Record the time in `docs/architecture/options.md`
+- [x] 8.1 Add `POST /delay` to `test/extmcp/cmd/stub-gate` and the scenario "Gate slower than the deadline" to `test/extmcp/e2e_test.go` (design decision 11). Verify: `make e2e` passes and logs the measured time. Record the time in `docs/architecture/options.md`
 
 ## 9. Gate end-to-end test
 

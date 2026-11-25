@@ -529,6 +529,28 @@ func TestE2E(t *testing.T) {
 		t.Logf("result as the gate received it: %s", responses[0].Result)
 	})
 
+	t.Run("Gate slower than the deadline", func(t *testing.T) {
+		e := newEnv(t)
+		e.post(gateURL + "/delay?d=10s")
+		s, _ := e.session("alice")
+		start := time.Now()
+		res, err := s.CallTool(e.ctx, &mcp.CallToolParams{Name: "delete_thing", Arguments: thing})
+		elapsed := time.Since(start)
+		t.Logf("measured time to the client error: %s", elapsed.Round(10*time.Millisecond))
+		if err == nil {
+			t.Fatalf("got a tool result, want a JSON-RPC error: isError=%v text=%q", res.IsError, text(res))
+		}
+		var rpcErr *jsonrpc.Error
+		if !errors.As(err, &rpcErr) {
+			t.Fatalf("got %T (%v), want a JSON-RPC error", err, err)
+		}
+		t.Logf("JSON-RPC error: code=%d message=%q", rpcErr.Code, rpcErr.Message)
+		if elapsed > 7*time.Second {
+			t.Fatalf("error after %s, want within 7s", elapsed)
+		}
+		e.upstreamCalls(0)
+	})
+
 	// Last, because it stops the gate. The gate loses its state.
 	t.Run("Gate unavailable", func(t *testing.T) {
 		e := newEnv(t)
