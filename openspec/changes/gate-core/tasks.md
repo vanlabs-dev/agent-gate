@@ -15,7 +15,7 @@ Work on the branch `gate-core`. Run `make check` before each push.
 ## 3. Policy
 
 - [x] 3.1 Write `internal/policy`: the `Decider` interface and the OPA implementation that loads a directory and computes the policy version (design decision 3). Verify: unit tests pass for allow, deny, approve, an undefined decision, an invalid outcome, a file that does not compile, a version change after a file change, and a ConfigMap-shaped directory that loads each file once with the same version as a plain directory
-- [ ] 3.2 Add `gate/deploy/policy/agentgate.rego` with the `kind` policy. Verify: a unit test runs it for each rule
+- [x] 3.2 Add `gate/deploy/policy/agentgate.rego` with the `kind` policy. Verify: a unit test runs it for each rule
 
 ## 4. Audit
 
