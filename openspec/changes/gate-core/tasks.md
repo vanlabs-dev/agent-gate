@@ -34,7 +34,7 @@ Work on the branch `gate-core`. Run `make check` before each push.
 ## 7. Server
 
 - [x] 7.1 Write `internal/extmcp`, the adapter (design decision 2), and `cmd/agent-gate` with config, the 3 s bound and `--test-endpoints` (design decision 6). Verify: an in-process gRPC test drives allow, deny, needs approval, approve, replay, and a call with two service names; the test endpoint returns 401 with no token and does not answer without the flag
-- [ ] 7.2 Add `gate/Dockerfile`. Verify: `docker build` passes and the image runs `agent-gate --help`
+- [x] 7.2 Add `gate/Dockerfile`. Verify: `docker build` passes and the image runs `agent-gate --help`
 
 ## 8. Callout deadline in the contract test
 
