@@ -8,7 +8,7 @@ SHELL := bash
 .SHELLFLAGS := -eo pipefail -c
 
 # Go modules that test-go, lint-go and vuln loop over.
-GO_MODULES := test/extmcp
+GO_MODULES := test/extmcp gate
 PY_PROJECT := agents/azure-ops
 
 GOLANGCI_LINT := go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
