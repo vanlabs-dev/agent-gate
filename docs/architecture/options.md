@@ -139,16 +139,22 @@ C keeps agentgateway in front and lets the gate execute after approval. It adds 
 
 ### Audit
 
-- Each entry stores SHA-256 of the previous hash plus the canonical JSON of the entry.
-- One appender writes under a lock, so the chain has one order.
-- On a schedule, the gate signs the chain head with a Key Vault key and writes the checkpoint to immutable Blob storage.
-- The verifier CLI recomputes the chain and compares it with the checkpoints.
+- Each entry holds the hash of the entry before it. Its own hash is SHA-256 over a domain string and the RFC 8785 encoding of the entry. The entry holds digests of arguments and results, not the values.
+- One appender writes under a Postgres advisory lock, so the chain has one order.
+- Every N entries the gate writes a checkpoint of the chain head. In Phase 1 checkpoints are unsigned. From Phase 4, the gate signs each checkpoint with a Key Vault key and writes it to immutable Blob storage.
+- `agent-gate-audit verify` recomputes the chain of an export and compares it with the checkpoints. The formats are in the [audit-log spec](../../openspec/specs/audit-log/spec.md).
 
 ### Identity
 
 - AKS workload identity gives the agent pod a managed identity. That identity is the credential for an Entra Agent ID blueprint.
 - Policy can use these [token claims](https://learn.microsoft.com/en-us/entra/agent-id/agent-token-claims): `tid`, `azp`, `oid`, `idtyp`, `roles`, and the agent markers `xms_act_fct` and `xms_sub_fct`.
 - The approver signs in to the inbox with Entra OIDC.
+- The gate reads the caller from one configured metadata key (default `sub`, `oid` from Phase 2) and the tenant from another (`tid` from Phase 2), or uses a fixed tenant. The route must forward each key, for example `oid: jwt.oid`.
+- On `kind`, Dex v2.46.1 takes the place of Entra. Agents get tokens with the `client_credentials` grant, with the shared audience `agent-gate`. agentgateway reads the Dex JWKS through a remote `jwks` with a `backendRef` to the Dex service.
+
+### Policy
+
+The gate embeds OPA. It evaluates `data.agentgate.decision` over the Rego files of one directory, with input `{tenant, agent, target, tool, arguments, claims}`, and expects `{"outcome": "allow" | "deny" | "approve", "reason": string}`. Anything else is a deny. The [tool-call-policy spec](../../openspec/specs/tool-call-policy/spec.md) holds the contract.
 
 ### Transport independence
 
