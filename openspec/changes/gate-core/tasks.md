@@ -25,7 +25,7 @@ Work on the branch `gate-core`. Run `make check` before each push.
 ## 5. Approval core
 
 - [x] 5.1 Write `internal/approval`: the `Store` interface, the decision flow of design decision 2, approve, reject, expiry and the requester rule, with an in-memory store for unit tests. Verify: unit tests cover each scenario in the `tool-call-approval` and `tool-call-policy` specs that needs no network, including policy changed to deny on replay
-- [ ] 5.2 Write `internal/identity`: caller and tenant from claims, and OIDC token checks with `go-oidc`. Verify: unit tests pass for the default claim, a configured `oid` claim, a missing claim, a token from an unknown issuer, and a token with an audience outside the configured list
+- [x] 5.2 Write `internal/identity`: caller and tenant from claims, and OIDC token checks with `go-oidc`. Verify: unit tests pass for the default claim, a configured `oid` claim, a missing claim, a token from an unknown issuer, and a token with an audience outside the configured list
 
 ## 6. Postgres
 
