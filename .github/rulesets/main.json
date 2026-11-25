@@ -32,7 +32,8 @@
           { "context": "govulncheck", "integration_id": 15368 },
           { "context": "secrets", "integration_id": 15368 },
           { "context": "actionlint", "integration_id": 15368 },
-          { "context": "agentgateway compatibility test", "integration_id": 15368 }
+          { "context": "agentgateway compatibility test", "integration_id": 15368 },
+          { "context": "gate end-to-end test", "integration_id": 15368 }
         ]
       }
     }

@@ -1,0 +1,102 @@
+# The gate and the stub MCP server. The policy ConfigMap agent-gate-policy is
+# created from gate/deploy/policy/ by `make e2e-gate`.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-gate
+  namespace: agent-gate-e2e
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-gate
+  template:
+    metadata:
+      labels:
+        app: agent-gate
+    spec:
+      containers:
+        - name: agent-gate
+          image: agent-gate/gate:dev
+          imagePullPolicy: Never
+          env:
+            - name: AGENT_GATE_DSN
+              value: postgres://postgres@postgres:5432/agent_gate?sslmode=disable
+            - name: AGENT_GATE_POLICY_DIR
+              value: /etc/agent-gate/policy
+            - name: AGENT_GATE_EXPIRY
+              value: 30s
+            - name: AGENT_GATE_CHECKPOINT_EVERY
+              value: "5"
+            - name: AGENT_GATE_TEST_ENDPOINTS
+              value: "true"
+            - name: AGENT_GATE_OIDC_ISSUER
+              value: http://dex.agent-gate-e2e.svc.cluster.local:5556/dex
+            - name: AGENT_GATE_OIDC_AUDIENCES
+              value: agent-gate
+          ports:
+            - containerPort: 9001
+            - containerPort: 8081
+          readinessProbe:
+            tcpSocket:
+              port: 9001
+          volumeMounts:
+            - name: policy
+              mountPath: /etc/agent-gate/policy
+      volumes:
+        - name: policy
+          configMap:
+            name: agent-gate-policy
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-gate
+  namespace: agent-gate-e2e
+spec:
+  selector:
+    app: agent-gate
+  ports:
+    - name: grpc
+      port: 9001
+      appProtocol: kubernetes.io/h2c
+    - name: http
+      port: 8081
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stub-mcp
+  namespace: agent-gate-e2e
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stub-mcp
+  template:
+    metadata:
+      labels:
+        app: stub-mcp
+    spec:
+      containers:
+        - name: stub-mcp
+          image: agent-gate/extmcp-stubs:dev
+          imagePullPolicy: Never
+          command: ["/stub-mcp"]
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stub-mcp
+  namespace: agent-gate-e2e
+spec:
+  selector:
+    app: stub-mcp
+  ports:
+    - name: http
+      port: 8080

@@ -22,6 +22,7 @@ jobs:
           cache-dependency-path: |
             versions.env
             test/extmcp/go.sum
+            gate/go.sum
       - run: make lint-go
       - if: ${{ !cancelled() }}
         run: make test-go
@@ -52,6 +53,7 @@ jobs:
           cache-dependency-path: |
             versions.env
             test/extmcp/go.sum
+            gate/go.sum
       - run: make vuln
 
   secrets:

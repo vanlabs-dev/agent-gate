@@ -1,0 +1,87 @@
+# Dex v2.46.1, the local OIDC issuer. In-memory storage. The client secrets
+# are test values for this kind cluster only; the e2e test uses the same ones.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dex
+  namespace: agent-gate-e2e
+data:
+  config.yaml: |
+    issuer: http://dex.agent-gate-e2e.svc.cluster.local:5556/dex
+    storage:
+      type: memory
+    web:
+      http: 0.0.0.0:5556
+    oauth2:
+      grantTypes: [authorization_code, refresh_token, client_credentials]
+    enablePasswordDB: true
+    # For approval-inbox. The hash is of the word "password", from the Dex examples.
+    staticPasswords:
+      - email: human@agent-gate.test
+        hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
+        username: human
+        userID: 4d1d9a2c-8f0e-4b8e-9a51-7f3c2d6e1b10
+    staticClients:
+      - id: agent-a
+        name: agent-a
+        secret: e2e-agent-a
+        grantTypes: [client_credentials]
+      - id: agent-b
+        name: agent-b
+        secret: e2e-agent-b
+        grantTypes: [client_credentials]
+      - id: approver
+        name: approver
+        secret: e2e-approver
+        grantTypes: [client_credentials]
+      # The shared audience. A token request with the scope
+      # audience:server:client_id:agent-gate gets aud [agent-gate, <client>].
+      - id: agent-gate
+        name: agent-gate
+        secret: e2e-agent-gate
+        trustedPeers: [agent-a, agent-b, approver]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dex
+  namespace: agent-gate-e2e
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dex
+  template:
+    metadata:
+      labels:
+        app: dex
+    spec:
+      containers:
+        - name: dex
+          image: DEX_IMAGE
+          args: [dex, serve, /etc/dex/config.yaml]
+          ports:
+            - containerPort: 5556
+          readinessProbe:
+            httpGet:
+              path: /dex/.well-known/openid-configuration
+              port: 5556
+          volumeMounts:
+            - name: config
+              mountPath: /etc/dex
+      volumes:
+        - name: config
+          configMap:
+            name: dex
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dex
+  namespace: agent-gate-e2e
+spec:
+  selector:
+    app: dex
+  ports:
+    - name: http
+      port: 5556
