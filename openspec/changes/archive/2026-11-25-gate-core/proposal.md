@@ -2,13 +2,13 @@
 
 ## Why
 
-Phase 0 proved the deny and replay contract with a stub gate. Phase 1 needs the real gate: a policy decision for each tool call, approvals that bind to one exact call, and an audit log that a third party can check. This change builds that core and proves it on `kind`. The [brainstorm](../../../docs/greenfield/gate-core/01-brainstorm.md) holds scope and success signals. The `approval-inbox` change follows it and replaces the test-only approval endpoint with the inbox.
+Phase 0 proved the deny and replay contract with a stub gate. Phase 1 needs the real gate: a policy decision for each tool call, approvals that bind to one exact call, and an audit log that a third party can check. This change builds that core and proves it on `kind`. The [brainstorm](../../../../docs/greenfield/gate-core/01-brainstorm.md) holds scope and success signals. The `approval-inbox` change follows it and replaces the test-only approval endpoint with the inbox.
 
 ## What Changes
 
 - Add a Go module at `gate/`: policy, approval, audit and canonical encoding packages with no `ExtMcp` types, an `ExtMcp` adapter, a Postgres store, and a test-only approval endpoint that is off unless a flag enables it.
-- Embed OPA ([ADR 0010](../../../docs/adr/0010-policy-engine-opa.md)). Rego files load from a directory, mounted from a ConfigMap on `kind`.
-- Bind each approval to a digest of tenant, agent, target, tool and RFC 8785 canonical arguments ([ADR 0009](../../../docs/adr/0009-suspension-deny-and-replay.md)). An approval is single use, expires after 1 hour by default, and cannot be given by the requester.
+- Embed OPA ([ADR 0010](../../../../docs/adr/0010-policy-engine-opa.md)). Rego files load from a directory, mounted from a ConfigMap on `kind`.
+- Bind each approval to a digest of tenant, agent, target, tool and RFC 8785 canonical arguments ([ADR 0009](../../../../docs/adr/0009-suspension-deny-and-replay.md)). An approval is single use, expires after 1 hour by default, and cannot be given by the requester.
 - Append each decision to a SHA-256 hash chain in Postgres. Write unsigned checkpoints in a format that takes signatures in Phase 4 with no change.
 - Add the CLI `agent-gate-audit` with `export` and `verify`.
 - Add an end-to-end test on its own `kind` cluster: agentgateway at the pinned version, Dex v2.46.1 as the local OIDC issuer, Postgres, the gate and the stub MCP server from `test/extmcp/`. One command runs it: `make e2e-gate`. CI runs it as a new required check.
