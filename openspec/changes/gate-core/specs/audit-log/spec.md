@@ -32,7 +32,7 @@ Entries SHALL have one order, with `seq` starting at 1 and rising by 1. The hash
 - **THEN** the exported chain verifies with no gap and no repeated `seq`
 
 ### Requirement: The gate writes checkpoints
-After a configured number of new entries, the gate SHALL write a checkpoint. A checkpoint SHALL hold `schema`, `log_id`, `seq`, `head_hash`, `prev_seq`, `prev_head_hash`, `time` and a `signatures` list. The `signatures` list SHALL stay outside the hashed bytes of the checkpoint, so that signatures can be added with no format change. In this change the list SHALL be empty.
+After a configured number of new entries, the gate SHALL write a checkpoint. A checkpoint SHALL hold `schema`, `log_id`, `seq`, `head_hash`, `prev_seq`, `prev_head_hash`, `time` and a `signatures` list. The `signatures` list SHALL stay outside the hashed bytes of the checkpoint, so that signatures can be added with no format change. In this change the list SHALL be empty. `log_id` SHALL be a configured value, separate from the tenant.
 
 #### Scenario: Checkpoint after N entries
 - **WHEN** the checkpoint interval is 5 and 5 entries are appended

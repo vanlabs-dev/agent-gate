@@ -7,7 +7,7 @@ Defines how the gate decides each MCP tool call: the caller identity it requires
 ## ADDED Requirements
 
 ### Requirement: Each call has a caller identity
-The gate SHALL take the caller from one identity claim. Configuration SHALL name that claim, with `sub` as the default. The gate SHALL take the tenant from a configured claim, or from a configured fixed value when no tenant claim is set. The gate SHALL deny a call that has no caller value or no tenant value, before policy runs.
+The gate SHALL take the caller from one identity claim. Configuration SHALL name that claim as the metadata key that the gateway forwards, with `sub` as the default. The gate SHALL take the tenant from a configured claim, or from a configured fixed value when no tenant claim is set. The gate SHALL deny a call that has no caller value or no tenant value, before policy runs.
 
 #### Scenario: Call with no identity claim
 - **WHEN** a `tools/call` reaches the gate with no value for the caller claim
@@ -21,7 +21,7 @@ The gate SHALL take the caller from one identity claim. Configuration SHALL name
 - **THEN** the gate uses the `oid` value as the caller
 
 ### Requirement: Policy decides one of three outcomes
-For each `tools/call` with a caller, the gate SHALL evaluate policy and get exactly one outcome: allow, deny or needs approval, each with a reason. Policy input SHALL hold the tenant, the caller, the target, the tool name, the arguments and the identity claims that the gate received.
+For each `tools/call` with a caller, the gate SHALL evaluate policy and get exactly one outcome: allow, deny or needs approval, each with a reason. Policy input SHALL hold the tenant, the caller, the target, the tool name, the arguments and the identity claims that the gateway forwards as metadata.
 
 #### Scenario: Allowed call
 - **WHEN** policy returns allow for a call
@@ -51,7 +51,7 @@ The gate SHALL deny a call when policy evaluation fails, returns no outcome, or 
 - **THEN** the gate exits non-zero and names the file
 
 ### Requirement: Policy loads from a directory
-The gate SHALL load every policy file from one configured directory at start. Each decision SHALL carry a policy version: a digest of the loaded policy files.
+At start the gate SHALL load each top-level file with the suffix `.rego` from one configured directory. It SHALL follow symlinks and skip names that start with `.`. Each decision SHALL carry a policy version: a digest of the base names and contents of the loaded files.
 
 #### Scenario: Policy version in the record
 - **WHEN** the gate decides a call
@@ -60,6 +60,11 @@ The gate SHALL load every policy file from one configured directory at start. Ea
 #### Scenario: Changed policy file
 - **WHEN** one policy file changes and the gate restarts
 - **THEN** later audit entries hold a different policy version
+
+#### Scenario: Directory mounted from a ConfigMap
+- **WHEN** the directory is a ConfigMap volume with its `..data` link and timestamped directory
+- **THEN** each policy file loads once
+- **AND** the policy version equals that of a plain directory with the same files
 
 ### Requirement: Calls other than tool calls pass
 The gate SHALL pass each MCP method other than `tools/call` without a policy decision.

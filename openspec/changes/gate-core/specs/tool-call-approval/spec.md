@@ -22,7 +22,7 @@ The gate SHALL compute a call digest over the tenant, the caller, the target, th
 - **THEN** the two calls have different call digests
 
 ### Requirement: Arguments are made canonical with RFC 8785
-The gate SHALL encode the arguments with RFC 8785 (JSON Canonicalization Scheme) before it computes a digest. The gate SHALL deny a call whose arguments hold a number that a 64-bit float cannot represent exactly, so that two different numbers never share a digest.
+The gate SHALL encode the arguments with RFC 8785 (JSON Canonicalization Scheme) before it computes a digest. The gate SHALL deny a call whose arguments hold an integer literal (no fraction and no exponent) outside ±(2^53 − 1), or a number that overflows a 64-bit float, so that two different integers never share a digest. The gate SHALL compare other numbers after rounding to a 64-bit float, as RFC 8785 requires.
 
 #### Scenario: RFC 8785 test vectors
 - **WHEN** the encoder runs on the test vectors of RFC 8785
@@ -36,6 +36,10 @@ The gate SHALL encode the arguments with RFC 8785 (JSON Canonicalization Scheme)
 - **WHEN** a call holds the argument `9007199254740993`
 - **THEN** the client receives a tool result with `isError` true
 - **AND** no approval request is stored
+
+#### Scenario: Decimal fraction
+- **WHEN** a call holds the argument `0.1`
+- **THEN** the gate computes a call digest and does not deny the call for that number
 
 ### Requirement: A call that needs approval is stored as a pending request
 When policy returns needs approval, the gate SHALL store a pending request with a new approval reference and deny the call. The reference SHALL be unguessable. When a pending request with the same call digest exists and has not expired, the gate SHALL return its reference and store no new request.
@@ -101,7 +105,7 @@ Each request SHALL expire at a fixed time after it was stored. The default SHALL
 - **THEN** the gate rejects the approval
 
 ### Requirement: The requester cannot approve
-The gate SHALL take the approver from a validated token, using the same configured claim as the caller. The gate SHALL reject a decision by an approver whose value equals the caller of the request.
+The gate SHALL take the approver from a validated token, using the same configured claim as the caller. The gate SHALL reject a decision by an approver whose value equals the caller of the request. In this change any other identity with a valid token MAY decide. Approver authorization belongs to `approval-inbox`.
 
 #### Scenario: Self-approval
 - **WHEN** the caller of a request tries to approve it
@@ -122,7 +126,7 @@ An approver SHALL be able to reject a pending request. The gate SHALL NOT pass a
 - **AND** the tool result contains a new reference
 
 ### Requirement: The test approval endpoint is off by default
-The gate SHALL serve the approval endpoint used by tests only when a start flag enables it. The endpoint SHALL accept a decision only with a bearer token that the gate validates against the configured OIDC issuer.
+The gate SHALL serve the approval endpoint used by tests only when a start flag enables it. The endpoint SHALL accept a decision only with a bearer token that the gate validates against the configured OIDC issuer and one of the configured audiences.
 
 #### Scenario: Default start
 - **WHEN** the gate starts with no test flag

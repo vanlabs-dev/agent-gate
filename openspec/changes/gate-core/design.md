@@ -29,6 +29,7 @@ Research on 2026-11-25 read three projects: the Microsoft Agent Governance Toolk
 - High availability. One gate replica. The Postgres lock makes a second replica safe, but no test covers it.
 - Policy reload without a restart.
 - Correlating a result entry with its request entry. See Open Questions.
+- Approver authorization. Any identity with a valid token other than the requester can decide. `approval-inbox` adds who may approve.
 
 ## Decisions
 
@@ -66,11 +67,13 @@ For each `tools/call`, the adapter builds a `Call{Tenant, Agent, Target, Tool, A
 
 `Target` is the single entry of the `ExtMcp` service names. The adapter denies a call with zero or several service names. `Tenant` comes from `tenant.claim`, or from `tenant.static` (default `local`) when the claim is not set. Phase 2 sets `tenant.claim: tid`.
 
+The caller and tenant claims reach the gate only as gateway `metadata` keys, for example `sub: jwt.sub`. The config names a metadata key, not a token claim. The route manifests forward each key the gate reads, so a config of `oid` also needs `oid: jwt.oid` on the route. Policy `claims` holds only the forwarded keys.
+
 The gate bounds its own work for one call with a 3 s context, below the 5 s gateway deadline. On a timeout it returns a gRPC error, which fails closed as a JSON-RPC error.
 
 ### 3. Policy contract
 
-Rego package `agentgate`. The gate evaluates `data.agentgate.decision` with input `{tenant, agent, target, tool, arguments, claims}` and expects `{"outcome": "allow" | "deny" | "approve", "reason": string}`. Anything else is deny. The policy version is `sha256:` over the sorted file names and contents. The query is prepared once at start.
+Rego package `agentgate`. The gate evaluates `data.agentgate.decision` with input `{tenant, agent, target, tool, arguments, claims}` and expects `{"outcome": "allow" | "deny" | "approve", "reason": string}`. Anything else is deny. The gate loads each top-level `*.rego` file in the directory, follows symlinks and skips names that start with `.`. A ConfigMap volume holds a `..data` link and a timestamped directory, and a plain walk loads each file twice and puts the timestamp into the version. The policy version is `sha256:` over the sorted base names and contents. The query is prepared once at start.
 
 The `kind` policy: `echo` allows; `delete_thing` with `id` equal to `prod` denies; any other `delete_thing` needs approval; any other tool denies. The deny rule reads the arguments, so the test proves that policy sees them.
 
@@ -82,10 +85,12 @@ call_digest = "sha256:" + hex(SHA-256(JCS({
   "tenant": ..., "agent": ..., "target": ..., "tool": ...,
   "arguments": <arguments, or null when absent>
 })))
-args_digest = "sha256:" + hex(SHA-256(JCS(arguments)))
+args_digest = "sha256:" + hex(SHA-256(JCS(arguments, or null when absent)))
 ```
 
-- From the Microsoft toolkit: the `sha256:` prefix, a schema version inside the hashed object, and the rule that a number outside the exact range of a 64-bit float breaks equality. The gate denies such a number rather than hashing it lossily.
+The gate denies an integer literal (no fraction, no exponent) outside ±(2^53 − 1) and any number that overflows to infinity. Other numbers are compared after float64 rounding, as RFC 8785 requires, so `0.1` passes.
+
+- From the Microsoft toolkit: the `sha256:` prefix, a schema version inside the hashed object, and the rule that an integer outside the exact range of a 64-bit float breaks equality. The gate denies such an integer rather than hashing it lossily.
 - Different from the toolkit: `tenant` is part of the digest, and the requester rule is explicit.
 - Library: `github.com/gowebpki/jcs` v1.0.2. A unit test runs the RFC 8785 test vectors. If the library fails one, replace it with the reference Go code from `cyberphone/json-canonicalization`.
 
@@ -98,11 +103,11 @@ Table `approval_requests`: `ref`, `call_digest`, `tenant`, `agent`, `target`, `t
 - Reference: `apr_` and 26 characters of base32 over 128 random bits.
 - Single use: `UPDATE ... SET status = 'used' WHERE ref = $1 AND status = 'approved' AND expires_at > now() RETURNING ref`. One row affected means pass. This is the toolkit's consume-once compare-and-swap, with the audit append in the same transaction.
 - Expiry is checked at decision time and at replay time, as in the toolkit. No background job.
-- An approval or rejection reads the approver from the test endpoint's validated token. It fails when the approver equals `agent`, the request is not pending, or it has expired. Each refusal appends `decision_refused`.
+- An approval or rejection reads the approver from the test endpoint's validated token. It fails when the approver equals `agent`, the request is not pending, or it has expired. Each refusal appends `decision_refused`. Any other identity with a valid token can decide. Approver authorization is a non-goal here.
 
 ### 6. Test approval endpoint
 
-`--test-endpoints` enables an HTTP listener with `POST /test/requests/{ref}/approve`, `POST /test/requests/{ref}/reject` and `POST /test/delay?for=<duration>`. Each needs a bearer token that `go-oidc` validates against the configured issuer and audience. The approver is the configured caller claim of that token. The flag is set only in `gate/deploy/`. `approval-inbox` removes the decision routes.
+`--test-endpoints` enables an HTTP listener with `POST /test/requests/{ref}/approve` and `POST /test/requests/{ref}/reject`. Each needs a bearer token that `go-oidc` validates against the configured issuer and a configured list of audiences. The callout deadline test uses the stub gate, so the gate has no delay route. The approver is the configured caller claim of that token. The flag is set only in `gate/deploy/`. `approval-inbox` removes the decision routes.
 
 ### 7. Audit append and chain
 
@@ -121,7 +126,7 @@ entry_hash      = "sha256:" + hex(SHA-256("agent-gate.audit/v1\n" || JCS(entry))
 checkpoint_hash = "sha256:" + hex(SHA-256("agent-gate.checkpoint/v1\n" || JCS(checkpoint without signatures)))
 ```
 
-`log_id` is the configured tenant value. Phase 4 adds items `{alg, key_id, sig}` to `signatures`, signed over `checkpoint_hash`.
+`log_id` comes from `audit.log_id`, default `local`, separate from the tenant. In Phase 2 the tenant comes from `tid` and one chain holds many tenants. Phase 4 adds items `{alg, key_id, sig}` to `signatures`, signed over `checkpoint_hash`.
 
 - From Preloop: an explicit field list, so a new column cannot slip in unhashed; domain separation strings; a nullable signature with a key id.
 - From capsule-emit: signatures outside the hashed bytes, a list so that witnesses can be added, `prev_seq` and `prev_head_hash` in each checkpoint.
@@ -133,6 +138,7 @@ Dex runs with in-memory storage and a ConfigMap config. Static clients `agent-a`
 
 - Dex writes `sub` as base64 of a protobuf of user id and connector id. The test computes the expected value and does not parse it.
 - agentgateway validates tokens through a `jwtAuthentication` policy. Use a remote JWKS pointing at the Dex service if v1.7.0 supports it. If not, the test fetches the Dex JWKS at setup and applies it inline, with Dex key rotation set to 720 h so that the key does not change during a run.
+- Dex sets `aud` to the client id for `client_credentials`, so `agent-a`, `agent-b` and `approver` tokens have three audiences. The gate and the gateway JWT policy accept a configured list of audiences. If Dex can issue a shared audience (cross-client `trustedPeers`), use that and record it. Task 1.1 checks which applies.
 - The gate validates test endpoint tokens with `go-oidc` against the in-cluster issuer URL.
 
 Alternative: navikt mock-oauth2-server. Rejected: JVM image, and `iss` follows the Host header, which breaks behind a port-forward.
@@ -141,7 +147,9 @@ Alternative: navikt mock-oauth2-server. Rejected: JVM image, and `iss` follows t
 
 Cluster `agent-gate-e2e`, namespace `agent-gate-e2e`. agentgateway installs from the same pinned charts as `make e2e`. Two `HTTPRoute`s reach the stub MCP backend: `/mcp` has the JWT policy; `/mcp-noauth` has none, so its calls reach the gate with no claims. The guardrails policy targets the backend and covers both. The stub MCP server is the image built from `test/extmcp/`. Postgres runs as a single pod on an `emptyDir`.
 
-The Postgres store tests (`internal/postgres`, build tag `pgtest`) run inside `make e2e-gate` against a port-forward. They cover the concurrent replay and concurrent append scenarios, which `make test` cannot reach without a database.
+The Postgres store tests (`internal/postgres`, build tag `pgtest`) run inside `make e2e-gate` against a port-forward. They cover the concurrent replay and concurrent append scenarios, which `make test` cannot reach without a database. They create and use their own database, `agent_gate_pgtest`, on the same server, so their appends do not enter the gate's chain.
+
+Approval expiry on `kind` is 30 s. The expiry scenario uses its own request and waits 31 s. A shorter gate-wide expiry would make every other approval scenario race the clock.
 
 The Makefile shares the cluster, gateway and image steps between `e2e` and `e2e-gate` through a `CLUSTER` variable. CI runs `make e2e-gate` in a new job `gate end-to-end test` in `.github/workflows/gate.yml`. The ruleset adds it as a required check.
 
@@ -154,6 +162,7 @@ The stub gate in `test/extmcp/` gets `POST /delay`. A new scenario sets 10 s, ca
 - [Dex client credentials are new and the `sub` encoding is not confirmed in the merged code] → Task 1.1 proves it first. If it fails, stop and ask.
 - [agentgateway v1.7.0 may not accept a remote JWKS] → Inline fallback in decision 9.
 - [The gate rejects large integers that some tools may send] → The tool error names the reason. Revisit if a real tool needs them.
+- [An approval can be used with no execution: the gate commits `used`, then the gateway times out or the upstream call fails ([issue #4245](https://github.com/agentgateway/agentgateway/issues/4245))] → Accepted. The agent needs a new approval. The 3 s bound keeps the first case rare.
 - [One advisory lock serializes every append] → Fine for Phase 1 volume. Shard per tenant later if needed.
 - [Without signatures, anyone with database write can rewrite the whole chain] → Accepted for Phase 1. Phase 4 signs checkpoints into immutable storage.
 - [The tail after the last checkpoint is not anchored] → The verifier reports it.
