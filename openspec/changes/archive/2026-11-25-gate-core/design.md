@@ -2,7 +2,7 @@
 
 ## Context
 
-See [proposal.md](proposal.md) for motivation and the [brainstorm](../../../docs/greenfield/gate-core/01-brainstorm.md) for scope. The repo has one Go module, `test/extmcp/`: a stub gate with in-memory state and a non-canonical digest, a stub MCP server, manifests and an end-to-end test that signs its own tokens. Its facts about agentgateway v1.7.0 are in [ADR 0009](../../../docs/adr/0009-suspension-deny-and-replay.md) and the [architecture options](../../../docs/architecture/options.md#known-limits-of-a). This design relies on them and does not repeat them.
+See [proposal.md](proposal.md) for motivation and the [brainstorm](../../../../docs/greenfield/gate-core/01-brainstorm.md) for scope. The repo has one Go module, `test/extmcp/`: a stub gate with in-memory state and a non-canonical digest, a stub MCP server, manifests and an end-to-end test that signs its own tokens. Its facts about agentgateway v1.7.0 are in [ADR 0009](../../../../docs/adr/0009-suspension-deny-and-replay.md) and the [architecture options](../../../../docs/architecture/options.md#known-limits-of-a). This design relies on them and does not repeat them.
 
 Research on 2026-11-25 read three projects: the Microsoft Agent Governance Toolkit (commit `3233be2`, ADR 0030 "action-bound approval protocol"), Preloop (commit `24d6624`, `services/audit_chain.py`) and capsule-emit (commit `e744134`). Decisions 4, 5 and 8 cite what each one gave.
 

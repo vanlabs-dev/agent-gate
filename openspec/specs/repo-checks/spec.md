@@ -38,7 +38,7 @@ Defines the checks that guard the repo: the commands a developer runs before a p
 - **THEN** the command exits 0
 
 ### Requirement: Each pull request runs the checks
-Each pull request, and each update of `main`, SHALL run these checks: Go lint and unit tests, Python lint and tests, a Go vulnerability check, a secret scan, a workflow lint, and the cluster test. Each check SHALL run on each pull request, whatever files changed. Each check SHALL run the same command that a developer runs locally.
+Each pull request, and each update of `main`, SHALL run these checks: Go lint and unit tests, Python lint and tests, a Go vulnerability check, a secret scan, a workflow lint, the agentgateway compatibility test and the gate end-to-end test. Each check SHALL run on each pull request, whatever files changed. Each check SHALL run the same command that a developer runs locally.
 
 #### Scenario: Clean pull request
 - **WHEN** a pull request with no defect is opened
@@ -104,3 +104,14 @@ A change SHALL reach `main` only through a pull request whose checks all pass. N
 #### Scenario: Listed command
 - **WHEN** a command from the list in `AGENTS.md` is run on a clean checkout
 - **THEN** the command exists and exits 0
+
+### Requirement: The gate end-to-end test runs with one command
+`make e2e-gate` from the repo root SHALL create its own `kind` cluster, deploy agentgateway at the pinned version, the OIDC issuer, Postgres, the gate and the stub MCP server, run every end-to-end scenario of the gate, and exit 0 only when all of them pass. It SHALL exit non-zero when no scenario ran. It SHALL NOT read or change `~/.kube`.
+
+#### Scenario: Local run
+- **WHEN** a developer with the toolchain installed runs `make e2e-gate`
+- **THEN** the command exits 0 and reports each scenario as passed
+
+#### Scenario: No scenario ran
+- **WHEN** the end-to-end test is run with a wrong build tag
+- **THEN** `make e2e-gate` exits non-zero
