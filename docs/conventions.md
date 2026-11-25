@@ -2,13 +2,13 @@
 
 ## Repo layout
 
-`test/extmcp/`, `agents/azure-ops/` and `versions.env` exist. Each other path is proposed and is created when its phase starts.
+`test/extmcp/`, `gate/`, `agents/azure-ops/` and `versions.env` exist. Each other path is proposed and is created when its phase starts.
 
 | Path | Content |
 |---|---|
 | `versions.env` | The pinned versions of the check tools: `golangci-lint`, `govulncheck`, `actionlint`, `gitleaks` |
 | `test/extmcp/` | The agentgateway compatibility test: a stub gate, a stub MCP server, `kind` manifests and the pinned versions. Its own Go module |
-| `gate/` | The gate, in Go |
+| `gate/` | The gate, in Go: the policy, approval, audit and canonical encoding packages, the `ExtMcp` adapter, the Postgres store, the `agent-gate-audit` CLI, `kind` manifests, the end-to-end test, and the image pins in `gate/versions.env`. Its own Go module. Only `gate/internal/extmcp` imports the agentgateway bindings, which a `depguard` rule enforces |
 | `agents/azure-ops/` | The reference agent, in Python. A `uv` project with `ruff`, `pytest` and one smoke test. No agent logic before Phase 3 |
 | `infra/` | Terraform |
 | `deploy/` | Helm charts |
@@ -68,6 +68,7 @@ docs: Add cost model
   | `secrets` | `ci.yml` | `make secrets` |
   | `actionlint` | `ci.yml` | `make lint-actions` |
   | `agentgateway compatibility test` | `extmcp.yml` | `make e2e` |
+  | `gate end-to-end test` | `gate.yml` | `make e2e-gate` |
 
 - Checks that start in Phase 2: `terraform fmt`, `terraform validate`, `tflint`, and the image and IaC scan.
 - Each `uses:` line names a full commit SHA, with the version in a comment. Dependabot proposes updates of the actions, the Go modules and the Python packages each month.
@@ -87,9 +88,9 @@ One environment, `demo`. `kind` in CI takes the place of a staging cluster.
 
 ## Dependencies
 
-- Pin agentgateway and the `ExtMcp` bindings to an exact version. The versions are in `test/extmcp/versions.env` and `test/extmcp/go.mod`.
+- Pin agentgateway and the `ExtMcp` bindings to an exact version. The versions are in `test/extmcp/versions.env`, `test/extmcp/go.mod` and `gate/go.mod`. Both modules use the same bindings commit.
 - Upgrade through the compatibility test, `make e2e`, not by a floating tag.
-- Dependabot does not update the check tools in `versions.env`, the Go version in `go.mod` or `test/extmcp/versions.env`. Update them by hand, one line at a time, and run `make check`.
+- Dependabot does not update the check tools in `versions.env`, the Go version in `go.mod`, `test/extmcp/versions.env` or `gate/versions.env`. Update them by hand, one line at a time, and run `make check`.
 
 ## Secrets
 

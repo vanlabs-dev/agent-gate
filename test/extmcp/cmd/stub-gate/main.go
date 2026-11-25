@@ -15,6 +15,7 @@ import (
 	"net"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/agentgateway/agentgateway/api"
 	"google.golang.org/grpc"
@@ -54,6 +55,7 @@ type gate struct {
 	approvals map[string]*approval // by reference
 	requests  []seenRequest
 	responses []seenResponse
+	delay     time.Duration // before each CheckRequest answer
 }
 
 func newGate() *gate {
@@ -101,6 +103,12 @@ func digest(sub string, services []string, name string, arguments json.RawMessag
 }
 
 func (g *gate) CheckRequest(_ context.Context, req *api.McpRequest) (*api.McpRequestResult, error) {
+	g.mu.Lock()
+	delay := g.delay
+	g.mu.Unlock()
+	// Sleep without the lock, so that the test endpoints still answer.
+	time.Sleep(delay)
+
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
@@ -194,9 +202,21 @@ func (g *gate) handler() http.Handler {
 		defer g.mu.Unlock()
 		writeJSON(w, append([]seenResponse{}, g.responses...))
 	})
+	// POST /delay?d=10s delays each CheckRequest answer, to test the callout deadline.
+	mux.HandleFunc("POST /delay", func(w http.ResponseWriter, r *http.Request) {
+		d, err := time.ParseDuration(r.URL.Query().Get("d"))
+		if err != nil || d < 0 {
+			http.Error(w, "invalid duration", http.StatusBadRequest)
+			return
+		}
+		g.mu.Lock()
+		defer g.mu.Unlock()
+		g.delay = d
+	})
 	mux.HandleFunc("POST /reset", func(http.ResponseWriter, *http.Request) {
 		g.mu.Lock()
 		defer g.mu.Unlock()
+		g.delay = 0
 		g.approvals = map[string]*approval{}
 		g.requests = nil
 		g.responses = nil

@@ -3,9 +3,23 @@ version: "2"
 run:
   build-tags:
     - e2e
+    - pgtest
 
 linters:
   default: standard
+  enable:
+    - depguard
+  settings:
+    depguard:
+      rules:
+        # In the gate, only the adapter may import the agentgateway bindings.
+        gate-core:
+          files:
+            - "**/gate/**"
+            - "!**/gate/internal/extmcp/**"
+          deny:
+            - pkg: github.com/agentgateway/agentgateway/api
+              desc: only gate/internal/extmcp imports the agentgateway bindings
   exclusions:
     presets:
       - std-error-handling

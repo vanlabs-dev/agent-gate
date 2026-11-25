@@ -56,7 +56,7 @@ spec:
             methods:
               tools/call: Full
 ---
-# Deadline for the call to the stub gate. Configured, not tested.
+# Deadline for the call to the stub gate. The scenario "Gate slower than the deadline" tests it.
 apiVersion: agentgateway.dev/v1alpha1
 kind: AgentgatewayPolicy
 metadata:

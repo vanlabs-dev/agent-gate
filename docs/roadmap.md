@@ -2,7 +2,7 @@
 
 The plan assumes about 10 hours a week from one maintainer. The order puts the largest technical risk first and delays cloud cost until the core works.
 
-Phase 0 was completed on 2026-11-18. Phase 1 started on 2026-11-24 with the `gate-core` change.
+Phase 0 was completed on 2026-11-18. Phase 1 started on 2026-11-24. The `gate-core` change built the policy engine, approvals, replay, the hash-chained audit and the verifier CLI, and proved them on `kind` on 2026-11-25. The `approval-inbox` change follows with the minimal inbox, then the tag `v0.1.0`.
 
 | Phase | Weeks | Ships | Exit test |
 |---|---|---|---|

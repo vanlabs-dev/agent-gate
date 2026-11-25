@@ -75,7 +75,7 @@ sequenceDiagram
 
 ## What is proven today
 
-The compatibility test runs 11 scenarios against real agentgateway v1.7.0 on `kind`. A stub gate and a stub MCP server take the place of the real services.
+The compatibility test runs 12 scenarios against real agentgateway v1.7.0 on `kind`. A stub gate and a stub MCP server take the place of the real services.
 
 | Contract | Scenario |
 |---|---|
@@ -88,9 +88,12 @@ The compatibility test runs 11 scenarios against real agentgateway v1.7.0 on `ki
 | The gate receives the tool, the arguments and a validated identity claim, and never the token | Call with a valid token |
 | The gateway rejects a bad token before the gate and the upstream server | Call with a token that fails validation, Call with no token |
 | The gate receives the result of a passed call | Result of a passed call |
+| A gate slower than the 5 s callout deadline fails closed within the deadline | Gate slower than the deadline |
 | A gate outage fails closed | Gate unavailable |
 
 The full contract is in the [spec](openspec/specs/agentgateway-integration/spec.md).
+
+The gate end-to-end test, `make e2e-gate`, runs 14 scenarios against the real gate on its own `kind` cluster, with Dex as the OIDC issuer and Postgres as the store. It covers allow, deny, approval with one identical replay, the requester rule, expiry, rejection, a call with no identity, and an audit export that `agent-gate-audit verify` accepts and rejects after one entry is changed, removed or swapped. The specs are [tool-call-policy](openspec/specs/tool-call-policy/spec.md), [tool-call-approval](openspec/specs/tool-call-approval/spec.md) and [audit-log](openspec/specs/audit-log/spec.md).
 
 ## Run the checks
 
@@ -112,10 +115,10 @@ Required tools: Go, Docker, `kind`, `kubectl`, Helm 4 and `make`. Versions are p
 make e2e
 ```
 
-The command creates the `kind` cluster `agent-gate-extmcp`, deploys the pinned agentgateway with both stubs, and runs each scenario. It exits 0 only when every scenario passes. It takes about one minute, and keeps its kubeconfig in `test/extmcp/.kube/`.
+The command creates the `kind` cluster `agent-gate-extmcp`, deploys the pinned agentgateway with both stubs, and runs each scenario. It exits 0 only when every scenario passes. It takes a few minutes, and keeps its kubeconfig in `test/extmcp/.kube/`.
 
 ```text
---- PASS: TestE2E (1.68s)
+--- PASS: TestE2E (6.57s)
     --- PASS: TestE2E/Ungated_tool (0.01s)
     --- PASS: TestE2E/First_call_to_a_gated_tool (0.00s)
     --- PASS: TestE2E/Replay_after_approval (0.01s)
@@ -126,14 +129,25 @@ The command creates the `kind` cluster `agent-gate-extmcp`, deploys the pinned a
     --- PASS: TestE2E/Call_with_a_token_that_fails_validation (0.00s)
     --- PASS: TestE2E/Call_with_no_token (0.00s)
     --- PASS: TestE2E/Result_of_a_passed_call (0.00s)
-    --- PASS: TestE2E/Gate_unavailable (1.62s)
+    --- PASS: TestE2E/Gate_slower_than_the_deadline (5.01s)
+    --- PASS: TestE2E/Gate_unavailable (1.51s)
 ```
 
 ```sh
 make clean
 ```
 
-This deletes the cluster.
+This deletes the clusters of `make e2e` and `make e2e-gate`.
+
+## Run the gate end-to-end test
+
+Required tools: the same as the compatibility test. The Dex and Postgres images are pinned in [`gate/versions.env`](gate/versions.env).
+
+```sh
+make e2e-gate
+```
+
+The command creates the `kind` cluster `agent-gate-e2e`, deploys agentgateway, Dex, Postgres, the gate and the stub MCP server, runs the Postgres store tests and each scenario, and exits 0 only when all pass. The expiry scenario waits 31 s. The kubeconfig is in `gate/.kube/`.
 
 ## Where it fits
 
@@ -150,7 +164,7 @@ A team that does not run agentgateway or Entra should look at [Preloop](https://
 | Phase | Ships | State |
 |---|---|---|
 | 0 Foundations | Repo, conventions, CI, and the agentgateway spike | Done |
-| 1 Core on `kind` | Policy engine, approvals, replay, hash-chained audit, verifier CLI, minimal inbox | Next |
+| 1 Core on `kind` | Policy engine, approvals, replay, hash-chained audit, verifier CLI, minimal inbox | In progress: all but the inbox are built |
 | 2 Azure | Terraform, AKS, keyless deploy, Entra token checks | Planned |
 | 3 Agent and demo | Python ops agent with one real action, guest sign-in, guided tour | Planned |
 
@@ -160,6 +174,7 @@ The [roadmap](docs/roadmap.md) holds every phase and its exit test.
 
 | Path | Content |
 |---|---|
+| [`gate/`](gate/) | The gate: policy, approvals, audit, the `ExtMcp` adapter, the Postgres store, the `agent-gate-audit` CLI and its end-to-end test |
 | [`test/extmcp/`](test/extmcp/) | The compatibility test: stub gate, stub MCP server, `kind` manifests, pinned versions |
 | [`agents/azure-ops/`](agents/azure-ops/) | The Python project of the ops agent. Scaffold only until Phase 3 |
 | [`docs/`](docs/) | Vision, architecture, decision records, roadmap, cost model, conventions |

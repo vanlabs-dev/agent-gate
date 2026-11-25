@@ -94,7 +94,7 @@ sequenceDiagram
 - The gate receives the gateway's re-encoding of the params with `_meta` merged in, not the client's bytes. The approval digest must read only the tool name and the arguments.
 - An empty `allowedRequestHeaders` forwards every request header to the gate. Set the list. The gateway removes the token after validation unless `preserveToken` is set.
 - `CheckResponse` does not run for upstream errors ([issue #4245](https://github.com/agentgateway/agentgateway/issues/4245)), so a failed execution leaves no result digest.
-- The deadline of the callout is not settled. The gateway code sets a default of 10 s (`with_default_timeout` in `guardrails/client.rs`). A comment in the upstream [test manifest](https://github.com/agentgateway/agentgateway/blob/v1.7.0/controller/test/e2e/testdata/extmcp/extmcp.yaml) says that the call has no deadline without a timeout policy. The compatibility test sets a `requestTimeout` of 5 s on the gate service and does not test it. Set a deadline, and measure it in Phase 1.
+- The callout deadline is the `requestTimeout` of a backend policy on the gate service. With 5 s set and a gate that delays its answer by 10 s, the client got a JSON-RPC error (`-32603`, "guardrail check failed") after 5.00 s, and the upstream got no call (measured 2026-11-25, scenario "Gate slower than the deadline" of `make e2e`). The gate bounds its own work to 3 s, below that deadline.
 - A gate outage fails closed when `failureMode` is `FailClosed`, the default. The client receives a JSON-RPC internal error and the upstream server receives no call. The compatibility test proves this.
 - `ExtMcp` is a young API. The agentgateway version is pinned, and an upgrade must pass the compatibility test in `test/extmcp/`.
 
@@ -139,16 +139,22 @@ C keeps agentgateway in front and lets the gate execute after approval. It adds 
 
 ### Audit
 
-- Each entry stores SHA-256 of the previous hash plus the canonical JSON of the entry.
-- One appender writes under a lock, so the chain has one order.
-- On a schedule, the gate signs the chain head with a Key Vault key and writes the checkpoint to immutable Blob storage.
-- The verifier CLI recomputes the chain and compares it with the checkpoints.
+- Each entry holds the hash of the entry before it. Its own hash is SHA-256 over a domain string and the RFC 8785 encoding of the entry. The entry holds digests of arguments and results, not the values.
+- One appender writes under a Postgres advisory lock, so the chain has one order.
+- Every N entries the gate writes a checkpoint of the chain head. In Phase 1 checkpoints are unsigned. From Phase 4, the gate signs each checkpoint with a Key Vault key and writes it to immutable Blob storage.
+- `agent-gate-audit verify` recomputes the chain of an export and compares it with the checkpoints. The formats are in the [audit-log spec](../../openspec/specs/audit-log/spec.md).
 
 ### Identity
 
 - AKS workload identity gives the agent pod a managed identity. That identity is the credential for an Entra Agent ID blueprint.
 - Policy can use these [token claims](https://learn.microsoft.com/en-us/entra/agent-id/agent-token-claims): `tid`, `azp`, `oid`, `idtyp`, `roles`, and the agent markers `xms_act_fct` and `xms_sub_fct`.
 - The approver signs in to the inbox with Entra OIDC.
+- The gate reads the caller from one configured metadata key (default `sub`, `oid` from Phase 2) and the tenant from another (`tid` from Phase 2), or uses a fixed tenant. The route must forward each key, for example `oid: jwt.oid`.
+- On `kind`, Dex v2.46.1 takes the place of Entra. Agents get tokens with the `client_credentials` grant, with the shared audience `agent-gate`. agentgateway reads the Dex JWKS through a remote `jwks` with a `backendRef` to the Dex service.
+
+### Policy
+
+The gate embeds OPA. It evaluates `data.agentgate.decision` over the Rego files of one directory, with input `{tenant, agent, target, tool, arguments, claims}`, and expects `{"outcome": "allow" | "deny" | "approve", "reason": string}`. Anything else is a deny. The [tool-call-policy spec](../../openspec/specs/tool-call-policy/spec.md) holds the contract.
 
 ### Transport independence
 

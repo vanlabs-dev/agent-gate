@@ -136,9 +136,9 @@ checkpoint_hash = "sha256:" + hex(SHA-256("agent-gate.checkpoint/v1\n" || JCS(ch
 
 Dex runs with in-memory storage and a ConfigMap config. Static clients `agent-a`, `agent-b` and `approver` use the `client_credentials` grant, which Dex added in v2.46.0. One static password user exists for `approval-inbox`.
 
-- Dex writes `sub` as base64 of a protobuf of user id and connector id. The test computes the expected value and does not parse it.
-- agentgateway validates tokens through a `jwtAuthentication` policy. Use a remote JWKS pointing at the Dex service if v1.7.0 supports it. If not, the test fetches the Dex JWKS at setup and applies it inline, with Dex key rotation set to 720 h so that the key does not change during a run.
-- Dex sets `aud` to the client id for `client_credentials`, so `agent-a`, `agent-b` and `approver` tokens have three audiences. The gate and the gateway JWT policy accept a configured list of audiences. If Dex can issue a shared audience (cross-client `trustedPeers`), use that and record it. Task 1.1 checks which applies.
+- Dex writes `sub` as base64url, without padding, of a protobuf whose field 1 is the user id. For `client_credentials` the user id is the client id and there is no connector field: `agent-a` gives `CgdhZ2VudC1h`. The test computes the expected value and does not parse it. Task 1.1 confirmed this on 2026-11-25. `iss` stays the configured issuer through a port-forward.
+- agentgateway v1.7.0 takes `jwks.remote` with a `backendRef` to the Dex `Service` and `jwksPath: dex/keys`. The controller fetches it over plain HTTP when no backend TLS policy is set, and caches it for at least 5 minutes. Task 1.2 confirmed this. The inline fallback is not needed.
+- Dex sets `aud` to the client id by default. A static client `agent-gate` lists `agent-a`, `agent-b` and `approver` in `trustedPeers`, and each token request asks for the scope `audience:server:client_id:agent-gate`. The access and ID tokens then carry `aud: ["agent-gate", "<client>"]`. The gate and the gateway accept the configured list of audiences, which on `kind` is `[agent-gate]`.
 - The gate validates test endpoint tokens with `go-oidc` against the in-cluster issuer URL.
 
 Alternative: navikt mock-oauth2-server. Rejected: JVM image, and `iss` follows the Host header, which breaks behind a port-forward.
@@ -159,8 +159,6 @@ The stub gate in `test/extmcp/` gets `POST /delay`. A new scenario sets 10 s, ca
 
 ## Risks / Trade-offs
 
-- [Dex client credentials are new and the `sub` encoding is not confirmed in the merged code] → Task 1.1 proves it first. If it fails, stop and ask.
-- [agentgateway v1.7.0 may not accept a remote JWKS] → Inline fallback in decision 9.
 - [The gate rejects large integers that some tools may send] → The tool error names the reason. Revisit if a real tool needs them.
 - [An approval can be used with no execution: the gate commits `used`, then the gateway times out or the upstream call fails ([issue #4245](https://github.com/agentgateway/agentgateway/issues/4245))] → Accepted. The agent needs a new approval. The 3 s bound keeps the first case rare.
 - [One advisory lock serializes every append] → Fine for Phase 1 volume. Shard per tenant later if needed.

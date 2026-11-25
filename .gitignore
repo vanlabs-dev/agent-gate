@@ -1,5 +1,8 @@
 test/extmcp/.kube/
 test/extmcp/e2e.log
+gate/.kube/
+gate/e2e.log
+gate/pgtest.log
 .venv/
 __pycache__/
 *.pyc

@@ -25,7 +25,8 @@ Run each from the repo root. Run `make check` before each push.
 | `make vuln` | `govulncheck` on each Go module | Go, network |
 | `make secrets` | `gitleaks` on the history of `HEAD` | Go |
 | `make e2e` | The agentgateway compatibility test on a `kind` cluster | Go, Docker, `kind`, `kubectl`, Helm 4 |
-| `make clean` | Deletes the `kind` cluster of `make e2e` | `kind` |
+| `make e2e-gate` | The gate end-to-end test on its own `kind` cluster: agentgateway, Dex, Postgres, the gate and the stub MCP server | Go, Docker, `kind`, `kubectl`, Helm 4 |
+| `make clean` | Deletes the `kind` clusters of `make e2e` and `make e2e-gate` | `kind` |
 
 The Go tools run with `go run <module>@<version>`. Their versions are in [`versions.env`](versions.env). Nothing needs to be installed beyond Go and `uv`.
 
