@@ -10,7 +10,7 @@ Work on the branch `gate-core`. Run `make check` before each push.
 ## 2. Module and canonical encoding
 
 - [x] 2.1 Create the Go module `gate/` with the layout of design decision 1, the bindings pinned to the commit in `test/extmcp/go.mod`, and `gate/versions.env`. Add `gate` to `GO_MODULES` and a `depguard` rule that allows the bindings only in `internal/extmcp`. Add `gate/` to `.github/dependabot.yml` with the bindings ignored. Verify: `make check` passes, and an import of the bindings from `internal/policy` fails `make lint-go`
-- [ ] 2.2 Write `internal/canonical`: JCS encoding, the unsafe number check, `CallDigest` and `ArgsDigest` (design decision 4). Verify: unit tests pass for the RFC 8785 test vectors, key order and white space, `_meta` ignored, each changed field giving a new digest, `9007199254740993` and `1e400` refused, `0.1` accepted, and absent arguments hashed as `null`
+- [x] 2.2 Write `internal/canonical`: JCS encoding, the unsafe number check, `CallDigest` and `ArgsDigest` (design decision 4). Verify: unit tests pass for the RFC 8785 test vectors, key order and white space, `_meta` ignored, each changed field giving a new digest, `9007199254740993` and `1e400` refused, `0.1` accepted, and absent arguments hashed as `null`
 
 ## 3. Policy
 

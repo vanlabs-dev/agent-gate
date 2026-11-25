@@ -2,7 +2,10 @@ module github.com/vanlabs-dev/agent-gate/gate
 
 go 1.27.4
 
-require github.com/agentgateway/agentgateway/api v0.0.0-20261027162624-26f5aebe99a3
+require (
+	github.com/agentgateway/agentgateway/api v0.0.0-20261027162624-26f5aebe99a3
+	github.com/gowebpki/jcs v1.0.2
+)
 
 require (
 	github.com/golang/protobuf v1.5.4 // indirect
