@@ -4,8 +4,8 @@ Work on the branch `gate-core`. Run `make check` before each push.
 
 ## 1. Risk checks
 
-- [ ] 1.1 In a scratch `kind` cluster, run Dex v2.46.1 with one `client_credentials` client and get a token. Verify: the token's `iss` is the configured issuer even through a port-forward, its `sub` equals the value the test helper computes, and its `aud` is recorded, with whether Dex can issue a shared audience. If `iss` or `sub` fails, stop and ask the maintainer
-- [ ] 1.2 Read the agentgateway v1.7.0 `jwtAuthentication` source for remote JWKS. Verify: design decision 9 records which path applies, through `/opsx:update`
+- [x] 1.1 In a scratch `kind` cluster, run Dex v2.46.1 with one `client_credentials` client and get a token. Verify: the token's `iss` is the configured issuer even through a port-forward, its `sub` equals the value the test helper computes, and its `aud` is recorded, with whether Dex can issue a shared audience. If `iss` or `sub` fails, stop and ask the maintainer
+- [x] 1.2 Read the agentgateway v1.7.0 `jwtAuthentication` source for remote JWKS. Verify: design decision 9 records which path applies, through `/opsx:update`
 
 ## 2. Module and canonical encoding
 
