@@ -60,6 +60,8 @@ An `inbox` package in `gate/internal/` with an OIDC client, a session store, CSR
 
 ## Open questions
 
+Answered on 2026-11-27 in the [design](../../../openspec/changes/approval-inbox/design.md#answers-to-the-brainstorms-open-questions).
+
 1. Session store: Postgres, beside the approvals, or in memory? Postgres survives a restart and more than one replica.
 2. The input and output shape of the approver decision, and whether it lives in the same Rego package as the call decision.
 3. Which claims the approver identity uses on `kind` (Dex `sub` or `email`) and whether that matches the caller claim for the requester rule.
